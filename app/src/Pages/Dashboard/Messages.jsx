@@ -1,81 +1,125 @@
+import React, { useState } from 'react';
+import { ArrowLeft, MoreVertical, SendHorizontal } from 'lucide-react';
+
+// Dummy data for demonstration
+const conversationsData = [
+  { id: 1, name: 'Sarah Chen', avatar: 'https://placehold.co/40x40/6D28D9/FFFFFF?text=SC', message: 'Thanks for the feedback on the design...', time: '2m ago', unread: true, online: true },
+  { id: 2, name: 'Michael Torres', avatar: 'https://placehold.co/40x40/1D4ED8/FFFFFF?text=MT', message: 'Can we schedule a meeting for...', time: '1h ago', unread: false, online: false },
+  { id: 3, name: 'Emma Wilson', avatar: 'https://placehold.co/40x40/BE185D/FFFFFF?text=EW', message: 'The prototype looks great! When...', time: '3h ago', unread: true, online: true },
+  { id: 4, name: 'David Kim', avatar: 'https://placehold.co/40x40/047857/FFFFFF?text=DK', message: 'I have a question about the...', time: '5h ago', unread: false, online: false },
+];
+
 const Messages = () => {
+  // State to manage which conversation is active, especially for mobile view
+  const [activeConversation, setActiveConversation] = useState(null);
+
+  // Select the first conversation by default on larger screens
+  React.useEffect(() => {
+    if (window.innerWidth >= 768) { // md breakpoint
+      setActiveConversation(conversationsData[0]);
+    }
+  }, []);
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 h-full">
-      <div className="flex h-96">
-        <div className="w-80 border-r border-gray-200">
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-900">Conversations</h3>
-          </div>
-          <div className="overflow-y-auto h-full">
-            {[
-              { name: 'Sarah Chen', message: 'Thanks for the feedback on the design...', time: '2m ago', unread: true },
-              { name: 'Michael Torres', message: 'Can we schedule a meeting for...', time: '1h ago', unread: false },
-              { name: 'Emma Wilson', message: 'The prototype looks great! When...', time: '3h ago', unread: true },
-              { name: 'David Kim', message: 'I have a question about the...', time: '5h ago', unread: false },
-            ].map((conv, index) => (
-              <div key={index} className="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-medium text-gray-900">{conv.name}</span>
-                  <span className="text-xs text-gray-500">{conv.time}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-600 truncate">{conv.message}</p>
-                  {conv.unread && (
-                    <div className="w-2 h-2 bg-violet-600 rounded-full"></div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+    // Main container with dark theme and rounded corners
+    <div className="bg-gray-900 rounded-2xl shadow-lg h-full flex overflow-hidden">
+      
+      {/* --- Conversations List --- */}
+      {/* Hidden on mobile when a conversation is active, otherwise takes full width. Fixed width on desktop. */}
+      <div className={`
+        ${activeConversation ? 'hidden' : 'flex'} md:flex flex-col 
+        w-full md:w-80 lg:w-96 
+        bg-gray-800 border-r border-gray-700 transition-all duration-300
+      `}>
+        <div className="p-4 border-b border-gray-700">
+          <h3 className="font-semibold text-white text-lg">Conversations</h3>
         </div>
-        <div className="flex-1 p-6">
-          <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <img src="https://placehold.co/40x40/violet/white?text=SC" alt="Avatar" className="w-10 h-10 rounded-full" />
-                <div>
-                  <h4 className="font-semibold text-gray-900">Sarah Chen</h4>
-                  <p className="text-sm text-gray-500">Online</p>
-                </div>
+        <div className="overflow-y-auto flex-1">
+          {conversationsData.map((conv) => (
+            <div 
+              key={conv.id} 
+              className={`p-4 cursor-pointer border-b border-gray-700 last:border-b-0 transition-colors duration-200
+                ${activeConversation?.id === conv.id ? 'bg-indigo-600/30' : 'hover:bg-gray-700/50'}`
+              }
+              onClick={() => setActiveConversation(conv)}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className={`font-medium ${activeConversation?.id === conv.id ? 'text-white' : 'text-gray-200'}`}>{conv.name}</span>
+                <span className="text-xs text-gray-400">{conv.time}</span>
               </div>
-              <button className="text-gray-400 hover:text-gray-600">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto mb-4 space-y-4">
-              <div className="max-w-xs bg-violet-600 text-white rounded-2xl rounded-bl-sm px-4 py-2">
-                <p className="text-sm">Thanks for the feedback on the design system! I've incorporated all your suggestions.</p>
-              </div>
-              <div className="max-w-xs bg-gray-100 text-gray-900 rounded-2xl rounded-br-sm ml-auto px-4 py-2">
-                <p className="text-sm">Great! I'm glad you found the feedback helpful. The new components look much more consistent.</p>
-              </div>
-              <div className="max-w-xs bg-violet-600 text-white rounded-2xl rounded-bl-sm px-4 py-2">
-                <p className="text-sm">Do you have time for a quick call tomorrow to discuss the implementation timeline?</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-400 truncate pr-4">{conv.message}</p>
+                {conv.unread && (
+                  <div className="w-2.5 h-2.5 bg-indigo-500 rounded-full flex-shrink-0"></div>
+                )}
               </div>
             </div>
-            
-            <div className="border-t border-gray-200 pt-4">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Type a message..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                />
-                <button className="bg-violet-600 text-white p-2 rounded-full hover:bg-violet-700 transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
+
+      {/* --- Chat Window --- */}
+      {/* Hidden on mobile unless a conversation is active. Takes remaining space on desktop. */}
+      {activeConversation ? (
+        <div className="flex-1 flex flex-col">
+          {/* Chat Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800">
+            <div className="flex items-center gap-3">
+              {/* Back button for mobile view */}
+              <button 
+                className="text-gray-400 hover:text-white md:hidden"
+                onClick={() => setActiveConversation(null)}
+              >
+                <ArrowLeft size={20} />
+              </button>
+              <img src={activeConversation.avatar} alt="Avatar" className="w-10 h-10 rounded-full" />
+              <div>
+                <h4 className="font-semibold text-white">{activeConversation.name}</h4>
+                <p className={`text-sm ${activeConversation.online ? 'text-indigo-400' : 'text-gray-500'}`}>
+                  {activeConversation.online ? 'Online' : 'Offline'}
+                </p>
+              </div>
+            </div>
+            <button className="text-gray-400 hover:text-white">
+              <MoreVertical size={20} />
+            </button>
+          </div>
+          
+          {/* Message Area */}
+          <div className="flex-1 overflow-y-auto space-y-6 p-6">
+            <div className="max-w-md bg-gray-700 text-gray-200 rounded-2xl rounded-bl-lg px-4 py-3">
+              <p className="text-sm">Thanks for the feedback on the design system! I've incorporated all your suggestions.</p>
+            </div>
+            <div className="max-w-md bg-indigo-600 text-white rounded-2xl rounded-br-lg ml-auto px-4 py-3">
+              <p className="text-sm">Great! I'm glad you found the feedback helpful. The new components look much more consistent.</p>
+            </div>
+            <div className="max-w-md bg-gray-700 text-gray-200 rounded-2xl rounded-bl-lg px-4 py-3">
+              <p className="text-sm">Do you have time for a quick call tomorrow to discuss the implementation timeline?</p>
+            </div>
+          </div>
+          
+          {/* Message Input */}
+          <div className="border-t border-gray-700 p-4 bg-gray-800">
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                placeholder="Type a message..."
+                className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-full focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+              />
+              <button className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 transition-colors flex-shrink-0">
+                <SendHorizontal size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        // Placeholder for when no conversation is selected on mobile
+        <div className="hidden md:flex flex-1 items-center justify-center text-gray-500">
+          <p>Select a conversation to start chatting</p>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Messages
+export default Messages;

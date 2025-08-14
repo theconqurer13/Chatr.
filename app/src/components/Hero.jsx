@@ -26,17 +26,6 @@ const Hero = () => {
 
     return (
         <>
-            {/* Styles for marquee animation and custom font */}
-            <style>
-                {`
-                @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-                
-                * {
-                    font-family: 'Poppins', sans-serif;
-                }
-                
-                `}
-            </style>
 
             <section className="flex flex-col items-center  text-white pb-16 text-sm ">
                 <img src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/hero/gridPatternBg.svg" alt="hero-bg" className="absolute bottom-0 left-0 w-full pointer-events-none" />
@@ -49,9 +38,27 @@ const Hero = () => {
                         <a href="#" onClick={()=> scrollToSection(featureRef)} className="hover:text-gray-300">Features</a>
                         <a href="#" className="hover:text-gray-300">Pricing</a>
 
-                        {user ? (<UserButton/>) : (<button className=" md:hidden  bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-medium transition" onClick={openSignIn}>
+                        {user ? (
+                        <UserButton className="block" /> // logged in hone par har size pe show
+                        ) : (
+                        <>
+                            {/* Small screen */}
+                            <button
+                            className="md:hidden bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-medium transition"
+                            onClick={openSignIn}
+                            >
                             Sign up
-                        </button>)}
+                            </button>
+                            {/* Medium and above */}
+                            <button
+                            className="hidden md:block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full font-medium transition"
+                            onClick={openSignIn}
+                            >
+                            Sign up
+                            </button>
+                        </>
+                        )}
+
                         
                         <button onClick={() => setIsMenuOpen(false)} className="md:hidden bg-gray-900 hover:bg-gray-800 text-white p-2 rounded-md aspect-square font-medium transition">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -60,9 +67,7 @@ const Hero = () => {
                         </button>
                     </div>
                             
-                    {/* {user ? ((<UserButton/>)) : (<button className="hidden md:block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full font-medium transition" onClick={openSignIn} >
-                        Sign up
-                    </button>) } */}
+                    
                     
 
                     <button onClick={() => setIsMenuOpen(true)} className="md:hidden bg-gray-900 hover:bg-gray-800 text-white p-2 rounded-md aspect-square font-medium transition">
