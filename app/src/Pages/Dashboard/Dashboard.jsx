@@ -9,8 +9,11 @@ import {
   X
 } from "lucide-react";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 
 const Dashboard = () => {
+  const { user, isSignedIn } = useUser();
+  // const {user} = useUser();
   const [isEditing, setIsEditing] = React.useState(false);
   const [profileData, setProfileData] = React.useState({
     name: 'Alex Johnson',
@@ -71,7 +74,7 @@ const Dashboard = () => {
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 <img
-                  src="https://placehold.co/120x120/violet/white?text=AJ"
+                  src={user?.imageUrl}
                   alt="Profile"
                   className="w-32 h-32 rounded-full object-cover border-4 border-violet-100"
                 />
@@ -84,12 +87,12 @@ const Dashboard = () => {
               {isEditing ? (
                 <input
                   type="text"
-                  value={editForm.name}
+                  value={user?.fullName}
                   onChange={(e) => setEditForm({...editForm, name: e.target.value})}
                   className="text-xl font-semibold text-gray-900 text-center border-b-2 border-violet-300 focus:border-violet-600 outline-none px-2 py-1 w-48 "
                 />
               ) : (
-                <h3 className="text-xl font-semibold text-gray-900">{profileData.name}</h3>
+                <h3 className="text-xl font-semibold text-gray-900">{user?.fullName}</h3>
               )}
               <p className="text-gray-600">{profileData.jobTitle}</p>
             </div>
@@ -100,12 +103,12 @@ const Dashboard = () => {
                 {isEditing ? (
                   <input
                     type="email"
-                    value={editForm.email}
+                    value={user?.primaryEmailAddress?.emailAddress}
                     onChange={(e) => setEditForm({...editForm, email: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                   />
                 ) : (
-                  <p className="text-gray-900">{profileData.email}</p>
+                  <p className="text-gray-900">{user?.primaryEmailAddress?.emailAddress}</p>
                 )}
               </div>
 

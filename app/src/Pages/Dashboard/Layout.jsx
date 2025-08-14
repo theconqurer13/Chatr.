@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import { 
   User, 
   MessageCircle, 
@@ -10,25 +10,32 @@ import {
   X
 } from "lucide-react";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate,Outlet,useLocation } from "react-router-dom";
+import { UserButton, useUser,useClerk } from "@clerk/clerk-react";
 
 const Layout = () => {
+   const { user, isSignedIn } = useUser();
+   const { signOut } = useClerk();
   const location = useLocation();
   const navigate = useNavigate();
-  const [user] = React.useState({
+  const [userr] = React.useState({
     name: 'Alex Johnson',
     avatar: 'https://placehold.co/48x48/violet/white?text=AJ'
   });
   const [activeSection, setActiveSection] = useState('profile');
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      navigate("/"); // Not logged in? Back to Hero
+    }
+  }, [user]);
+
+
   const menuItems = [
     { id: 'profile', label: 'Profile', icon: User, path: '/profile' },
     { id: 'messages', label: 'Messages', icon: MessageCircle, path: '/profile/messages' },
     { id: 'requests', label: 'Pending Requests', icon: Bell, path: '/profile/pending-requests' }
   ];
-  
-  const handleLogout = () => {
-    // In a real app, you would clear authentication tokens here
-    navigate('/login');
-  };
+
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans">
@@ -38,12 +45,12 @@ const Layout = () => {
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <img
-              src={user.avatar}
+              src={user?.imageUrl || userr.avatar}
               alt="User"
               className="w-12 h-12 rounded-full"
             />
             <div>
-              <p className="font-semibold text-gray-900 truncate">{user.name}</p>
+              <p className="font-semibold text-gray-900 truncate">{user?.fullName || userr.name}</p>
               <p className="text-sm text-gray-600">Online</p>
             </div>
           </div>
@@ -78,7 +85,9 @@ const Layout = () => {
         {/* Logout */}
         <div className="p-4 border-t border-gray-200">
           <button
-            onClick={handleLogout}
+            onClick={() => {signOut({ redirectUrl: "/" });
+              
+            }}
             className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl transition-colors duration-200"
           >
             <LogOut size={20} />
@@ -106,9 +115,7 @@ const Layout = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <button className="w-10 h-10 bg-violet-600 text-white rounded-full flex items-center justify-center hover:bg-violet-700 transition-colors">
-                <User size={18} />
-              </button>
+              <UserButton/>
             </div>
           </div>
         </header>

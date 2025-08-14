@@ -17,7 +17,7 @@ const Features = () => {
                 `}</style>
         
         <h1 className="text-3xl font-semibold text-center mx-auto mt-15">Powerful Features</h1>
-        <p className="text-sm text-slate-400 text-center mt-2 max-w-md mx-auto">Everything you need to manage, track, and grow your finances, securely and efficiently.</p>
+        <p className="text-sm text-slate-400 text-center mt-2 max-w-[60vw] mx-auto">Fast messaging and instant file sharing — all secured with end-to-end encryption.Group chats, private talks, and smart search keep everything at your fingertips.Custom themes and cloud sync make sure your chats are always personal and always safe.</p>
         
         <div className="flex flex-wrap items-center justify-center gap-10 mt-16">
             <div className="max-w-80 hover:-translate-y-0.5 transition duration-300 ">
