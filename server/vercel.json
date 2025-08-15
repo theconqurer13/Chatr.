@@ -11,6 +11,13 @@
             }
         }
     ],
+    "functions": {
+    "api/**/*.js": {
+      "includeFiles": [
+        "node_modules/@clerk/**"
+      ]
+    }
+  },
     "routes": [
         {
             "src": "/(.*)",
