@@ -1,5 +1,4 @@
 import User from "../models/User.js";
-
 import { Webhook } from "svix";
 
 const clerkWebhooks = async (req, res) => {
@@ -9,17 +8,14 @@ const clerkWebhooks = async (req, res) => {
       throw new Error("Missing CLERK_WEBHOOK_SECRET in environment variables");
     }
 
-    // Clerk webhook headers (must be exact)
     const headers = {
       "svix-id": req.headers["svix-id"],
       "svix-timestamp": req.headers["svix-timestamp"],
       "svix-signature": req.headers["svix-signature"],
     };
 
-    // Convert raw buffer to string (important for signature verification)
     const payload = req.body.toString("utf8");
 
-    // Verify Clerk webhook signature
     const wh = new Webhook(WEBHOOK_SECRET);
     const evt = wh.verify(payload, headers);
 
@@ -27,13 +23,12 @@ const clerkWebhooks = async (req, res) => {
 
     const { data, type } = evt;
 
-    // Handle events
     if (type === "user.created") {
       const userData = {
         _id: data.id,
         email: data.email_addresses?.[0]?.email_address || "",
-        username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
-        image: data.image_url || "",
+        name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+        image: data.image_url || ""
       };
 
       const existingUser = await User.findById(data.id);
@@ -43,18 +38,17 @@ const clerkWebhooks = async (req, res) => {
       } else {
         console.log("ℹ️ User already exists:", userData.email);
       }
-       res.status(200).json({ message: 'Webhook received' });
-     
     }
 
     else if (type === "user.updated") {
-      const userData = {
+      const updateFields = {
         email: data.email_addresses?.[0]?.email_address || "",
-        username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+        name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
         image: data.image_url || "",
       };
-      await User.findByIdAndUpdate(data.id, userData, { new: true });
-      console.log("🔄 User updated:", userData.email);
+
+      await User.findByIdAndUpdate(data.id, { $set: updateFields }, { new: true });
+      console.log("🔄 User basic info updated (custom fields untouched):", updateFields.email);
     }
 
     else if (type === "user.deleted") {

@@ -17,7 +17,7 @@ app.use(clerkMiddleware())
 // API to listen Clerk Webhooks
 app.use("/api/clerk/webhooks", clerkrouter);
 const PORT = 3002;
-app.use(express.json());
+
 
 app.get('/',(req,res)=>{
     console.log('API is running');
