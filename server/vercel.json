@@ -1,16 +1,14 @@
 {
-    "version": 2,
-    "functions": {
+  "version": 2,
+  "functions": {
     "api/**/*.js": {
-      "includeFiles": [
-        "node_modules/@clerk/**"
-      ]
+      "includeFiles": "node_modules/@clerk/**"
     }
   },
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "server.js"
-        }
-    ]
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
+  ]
 }
