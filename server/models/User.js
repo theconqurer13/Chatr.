@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 
-const userSchema = new mongoose.Schema({
+const userSchema =  mongoose.Schema({
     _id:{type:String,required:true},
     name: {type:String,required:true},
     email: {type:String,required:true},
@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     instagramLink:String,
     facebookLink:String,
     jobTitle:String,
-    image:String
+    image:{type:String,required:true}
 },{timestamps:true});
 
 const User = mongoose.model("User",userSchema);
