@@ -34,12 +34,6 @@ const clerkWebhooks = async (req, res) => {
         email: data.email_addresses?.[0]?.email_address || "",
         username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
         image: data.image_url || "",
-        phoneNumber: data.phone_numbers?.[0]?.phone_number || null,
-        location: data.public_metadata?.location || "",
-        bio: data.public_metadata?.bio || "",
-        instagramLink: data.public_metadata?.instagramLink || "",
-        facebookLink: data.public_metadata?.facebookLink || "",
-        jobTitle: data.public_metadata?.jobTitle || "",
       };
 
       const existingUser = await User.findById(data.id);
@@ -49,6 +43,8 @@ const clerkWebhooks = async (req, res) => {
       } else {
         console.log("ℹ️ User already exists:", userData.email);
       }
+       res.status(200).json({ message: 'Webhook received' });
+     
     }
 
     else if (type === "user.updated") {
@@ -56,12 +52,6 @@ const clerkWebhooks = async (req, res) => {
         email: data.email_addresses?.[0]?.email_address || "",
         username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
         image: data.image_url || "",
-        phoneNumber: data.phone_numbers?.[0]?.phone_number || null,
-        location: data.public_metadata?.location || "",
-        bio: data.public_metadata?.bio || "",
-        instagramLink: data.public_metadata?.instagramLink || "",
-        facebookLink: data.public_metadata?.facebookLink || "",
-        jobTitle: data.public_metadata?.jobTitle || "",
       };
       await User.findByIdAndUpdate(data.id, userData, { new: true });
       console.log("🔄 User updated:", userData.email);
