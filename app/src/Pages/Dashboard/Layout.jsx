@@ -27,7 +27,6 @@ const Layout = () => {
             navigate("/"); // Not logged in? Back to Hero
         }
     }, [user]);
-
     const menuItems = [
         { id: '/profile', label: 'Profile', icon: User, path: '/profile' },
         { id: '/profile/messages', label: 'Messages', icon: MessageCircle, path: '/profile/messages' },
@@ -42,7 +41,7 @@ const Layout = () => {
             <div className="flex flex-col bg-gray-900 text-white shadow-lg transition-all duration-300 w-20 md:w-64">
                 
                 {/* User Profile */}
-                <div className="p-4 md:p-6 border-b border-gray-700">
+                <div className="p-4 md:p-3. border-b border-gray-700">
                     <div className="flex items-center justify-center md:justify-start gap-3">
                         <img
                             src={user?.imageUrl}
@@ -67,6 +66,7 @@ const Layout = () => {
                                     <button
                                         onClick={() => {
                                             navigate(item.path);
+                                            
                                         }}
                                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-left justify-center md:justify-start ${
                                             isActive
@@ -101,10 +101,10 @@ const Layout = () => {
             <div className="flex-1 flex flex-col overflow-hidden">
               {/* --- Top Bar (Header) --- */}
               {/* The background is now a very light shade of indigo */}
-              <header className="bg-gray-900 shadow-sm border-b border-indigo-200/30 px-4 md:px-8 py-4 backdrop-blur-sm">
+              <header className="bg-gray-900 shadow-sm border-b border-indigo-200/30 px-4 md:px-8 py-4.5 backdrop-blur-sm">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <h1 className="text-xl md:text-2xl font-medium text-white self-start md:self-center">
-                    {menuItems.find(item => activeSection.startsWith(item.id))?.label || "Dashboard"}
+                    {menuItems.find((item) => item.path === activeSection)?.label}
                   </h1>
                   <div className="flex items-center gap-4 w-full md:w-auto">
                     <div className="relative flex-1 md:flex-initial">

@@ -1,6 +1,11 @@
 import express from 'express';
-const app = express();
+import cors from 'cors';
+import connectDb from './configs/db.js';
 
+connectDb();
+
+const app = express();
+app.use(cors());
 const PORT = 3002;
 app.use(express.json());
 

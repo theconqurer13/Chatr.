@@ -13,12 +13,6 @@ const Messages = () => {
   // State to manage which conversation is active, especially for mobile view
   const [activeConversation, setActiveConversation] = useState(null);
 
-  // Select the first conversation by default on larger screens
-  React.useEffect(() => {
-    if (window.innerWidth >= 768) { // md breakpoint
-      setActiveConversation(conversationsData[0]);
-    }
-  }, []);
 
   return (
     // Main container with dark theme and rounded corners
