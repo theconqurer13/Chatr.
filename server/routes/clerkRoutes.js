@@ -6,6 +6,6 @@ import bodyParser from "body-parser";
 const clerkrouter = express.Router();
 
 // Sirf webhook route ke liye raw body use karo
-clerkrouter.post("/", bodyParser.raw({ type: "*/*" }), clerkWebhooks);
+clerkrouter.post("/", bodyParser.raw(express.raw({ type: "application/json" })), clerkWebhooks);
 
 export default clerkrouter;
