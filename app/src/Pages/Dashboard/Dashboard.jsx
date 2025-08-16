@@ -1,36 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { 
-  User, 
-  MessageCircle, 
-  Bell, 
-  LogOut,
   Edit2,
   Check,
   X
 } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
+import { useAppContext } from "../../context/AppContext";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
-  const { user } = useUser();
-  const [isEditing, setIsEditing] = React.useState(false);
+  const { user,getToken,axios,navigate } = useAppContext();
+  const [isEditing, setIsEditing] =useState(false);
   
   // Static data for fields not available from Clerk user object
-  const [profileData, setProfileData] = React.useState({
-    phone: '+1 (555) 123-4567',
-    location: 'San Francisco, CA',
-    bio: 'Product designer passionate about creating intuitive user experiences. Coffee enthusiast and amateur photographer.',
-    jobTitle: 'Senior Product Designer'
+  const [profileData, setProfileData] = useState({
+    phoneNumber: '',
+    location: '',
+    bio: '',
+    jobTitle: '',
+    instagramLink:'',
+    facebookLink:'',
+    
   });
 
   // Form state initialized with Clerk and static data
-  const [editForm, setEditForm] = React.useState({
+  const [editForm, setEditForm] = useState({
     name: user?.fullName || '',
     email: user?.primaryEmailAddress?.emailAddress || '',
     ...profileData
   });
 
   // Update form state if user data loads after initial render
-  React.useEffect(() => {
+  useEffect(() => {
     setEditForm(prevForm => ({
       ...prevForm,
       name: user?.fullName || '',
@@ -38,17 +39,30 @@ const Dashboard = () => {
     }));
   }, [user]);
 
-  const handleSave = () => {
-    // Here you would typically send the 'editForm' data to your backend API
-    setProfileData({
-      phone: editForm.phone,
-      location: editForm.location,
-      bio: editForm.bio,
-      jobTitle: editForm.jobTitle
-    });
-    // For Clerk user properties, you would call user.update()
-    // Example: user.update({ fullName: editForm.name });
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      const res = await axios.post("/api/user/updateProfile",{
+        phoneNumber: editForm.phoneNumber,
+        location: editForm.location,
+        bio: editForm.bio,
+        jobTitle: editForm.jobTitle,
+        instagramLink: editForm.instagramLink,
+        facebookLink: editForm.facebookLink,
+      },{
+        headers: {
+          Authorization: `Bearer ${ await getToken()}`
+        }
+      });
+      if (res.success) {
+        setProfileData(editForm); 
+        setIsEditing(false);
+        toast.success("Profile updated successfully");
+      }else{
+        toast.error(res.data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   const handleCancel = () => {

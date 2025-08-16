@@ -14,7 +14,7 @@ export const AppProvider = ({children})=>{
     
 
     const value = {
-
+        navigate,user,getToken,axios
     }
 
      return (

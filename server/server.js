@@ -5,6 +5,7 @@ dotenv.config();
 import connectDb from './configs/db.js';
 import { clerkMiddleware } from '@clerk/express'
 import clerkrouter from './routes/clerkRoutes.js';
+import userRouter from './routes/userRoutes.js';
 connectDb();
 
 const app = express();
@@ -23,7 +24,7 @@ app.get('/',(req,res)=>{
     res.send("API IS RUNNING")
 })
 
-
+app.use('/api/user',userRouter);
 
 
 app.listen(PORT,()=>{

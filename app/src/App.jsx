@@ -12,10 +12,12 @@ import PendingRequests from './Pages/Dashboard/PendingRequests'
 import SearchUser from './Pages/Dashboard/SearchUser'
 import UserProfile from './components/UserProfile'
 import RequestProfile from './components/RequestProfile'
+import {Toaster} from 'react-hot-toast'
 const App = () => {
   return (
 
     <div>
+      <Toaster/>
       <Routes>
         <Route path="/" element={<HeroSection/>} />
         <Route path="/profile" element={<Layout />}>
