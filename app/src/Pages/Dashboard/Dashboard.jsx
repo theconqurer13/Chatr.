@@ -1,63 +1,64 @@
 import React, { useEffect, useState } from "react";
-import { 
-  Edit2,
-  Check,
-  X
-} from "lucide-react";
-import { useUser } from "@clerk/clerk-react";
+import { Edit2, Check, X } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 import toast from "react-hot-toast";
 
 const Dashboard = () => {
-  const { user,getToken,axios,navigate } = useAppContext();
-  const [isEditing, setIsEditing] =useState(false);
-  
+  const { user, getToken, axios } = useAppContext();
+  const [isEditing, setIsEditing] = useState(false);
+
   // Static data for fields not available from Clerk user object
   const [profileData, setProfileData] = useState({
-    phoneNumber: '',
-    location: '',
-    bio: '',
-    jobTitle: '',
-    instagramLink:'',
-    facebookLink:'',
-    
+    phoneNumber: "",
+    location: "",
+    bio: "",
+    jobTitle: "",
+    instagramLink: "",
+    facebookLink: "",
   });
 
   // Form state initialized with Clerk and static data
   const [editForm, setEditForm] = useState({
-    name: user?.fullName || '',
-    email: user?.primaryEmailAddress?.emailAddress || '',
-    ...profileData
+    name: user?.fullName || "",
+    email: user?.primaryEmailAddress?.emailAddress || "",
+    ...profileData,
   });
 
   // Update form state if user data loads after initial render
   useEffect(() => {
-    setEditForm(prevForm => ({
+    setEditForm((prevForm) => ({
       ...prevForm,
-      name: user?.fullName || '',
-      email: user?.primaryEmailAddress?.emailAddress || '',
+      name: user?.fullName || "",
+      email: user?.primaryEmailAddress?.emailAddress || "",
+      ...profileData,
     }));
-  }, [user]);
+  }, [user, profileData]);
 
+  // Save profile handler
   const handleSave = async () => {
     try {
-      const res = await axios.post("/api/user/updateProfile",{
-        phoneNumber: editForm.phoneNumber,
-        location: editForm.location,
-        bio: editForm.bio,
-        jobTitle: editForm.jobTitle,
-        instagramLink: editForm.instagramLink,
-        facebookLink: editForm.facebookLink,
-      },{
-        headers: {
-          Authorization: `Bearer ${ await getToken()}`
+      const res = await axios.post(
+        "/api/user/updateProfile",
+        {
+          phoneNumber: editForm.phoneNumber,
+          location: editForm.location,
+          bio: editForm.bio,
+          jobTitle: editForm.jobTitle,
+          instagramLink: editForm.instagramLink,
+          facebookLink: editForm.facebookLink,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${await getToken()}`,
+          },
         }
-      });
-      if (res.success) {
-        setProfileData(editForm); 
+      );
+
+      if (res.data.success) {
+        setProfileData(editForm);
         setIsEditing(false);
         toast.success("Profile updated successfully");
-      }else{
+      } else {
         toast.error(res.data.message);
       }
     } catch (error) {
@@ -66,23 +67,19 @@ const Dashboard = () => {
   };
 
   const handleCancel = () => {
-    // Reset form to original data
     setEditForm({
-      name: user?.fullName || '',
-      email: user?.primaryEmailAddress?.emailAddress || '',
-      ...profileData
+      name: user?.fullName || "",
+      email: user?.primaryEmailAddress?.emailAddress || "",
+      ...profileData,
     });
     setIsEditing(false);
   };
 
   return (
-    // Responsive spacing for the entire component
-    <div className="space-y-6 ">
-      
+    <div className="space-y-6">
       {/* --- Profile Information Card --- */}
       <div className="bg-gray-900 rounded-2xl shadow-lg p-4 sm:p-6 md:p-8">
-        
-        {/* Card Header: Stacks on mobile, row on larger screens */}
+        {/* Card Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
           <h2 className="text-2xl font-semibold text-white">Profile Information</h2>
           {!isEditing ? (
@@ -113,9 +110,8 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Main Grid: 1 column on mobile/tablet, 2 on desktop */}
+        {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
           {/* Left Column */}
           <div className="space-y-6">
             <div className="flex flex-col items-center text-center space-y-4">
@@ -135,29 +131,42 @@ const Dashboard = () => {
                 <input
                   type="text"
                   value={editForm.name}
-                  onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, name: e.target.value })
+                  }
                   className="text-xl font-semibold text-white text-center bg-transparent border-b-2 border-gray-600 focus:border-indigo-500 outline-none px-2 py-1 w-full max-w-xs"
                 />
               ) : (
-                <h3 className="text-xl font-semibold text-white">{user?.fullName}</h3>
+                <h3 className="text-xl font-semibold text-white">
+                  {user?.fullName}
+                </h3>
               )}
               <p className="text-gray-400">{profileData.jobTitle}</p>
             </div>
 
+            {/* Contact Info */}
             <div className="space-y-4">
-              {['email', 'phone', 'location'].map((field) => (
+              {["email", "phoneNumber", "location"].map((field) => (
                 <div key={field}>
-                  <label className="block text-sm font-medium text-gray-400 mb-1 capitalize">{field}</label>
+                  <label className="block text-sm font-medium text-gray-400 mb-1 capitalize">
+                    {field}
+                  </label>
                   {isEditing ? (
                     <input
-                      type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
-                      value={editForm[field]}
-                      onChange={(e) => setEditForm({...editForm, [field]: e.target.value})}
+                      type={field === "email" ? "email" : "text"}
+                      value={editForm[field] || ""}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, [field]: e.target.value })
+                      }
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      readOnly={field === 'email'} // Email from Clerk is usually not editable here
+                      readOnly={field === "email"} // Clerk email not editable
                     />
                   ) : (
-                    <p className="text-gray-200">{field === 'email' ? user?.primaryEmailAddress?.emailAddress : profileData[field]}</p>
+                    <p className="text-gray-200">
+                      {field === "email"
+                        ? user?.primaryEmailAddress?.emailAddress
+                        : profileData[field]}
+                    </p>
                   )}
                 </div>
               ))}
@@ -167,30 +176,71 @@ const Dashboard = () => {
           {/* Right Column */}
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Bio</label>
+              <label className="block text-sm font-medium text-gray-400 mb-1">
+                Bio
+              </label>
               {isEditing ? (
                 <textarea
                   value={editForm.bio}
-                  onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, bio: e.target.value })
+                  }
                   rows={6}
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
                 />
               ) : (
-                <p className="text-gray-300 leading-relaxed">{profileData.bio}</p>
+                <p className="text-gray-300 leading-relaxed">
+                  {profileData.bio}
+                </p>
               )}
             </div>
 
+            {/* Social Links */}
             <div className="pt-4">
-              <h4 className="text-sm font-medium text-gray-400 mb-3">Social Links</h4>
+              <h4 className="text-sm font-medium text-gray-400 mb-3">
+                Social Links
+              </h4>
               <div className="space-y-2">
-                {/* Example Social Links */}
                 <div className="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
-                  <span className="text-sm text-gray-400">LinkedIn</span>
-                  <span className="text-sm text-indigo-400 font-medium">linkedin.com/in/alexj</span>
+                  <label className="text-sm text-gray-400">Instagram</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editForm.instagramLink}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          instagramLink: e.target.value,
+                        })
+                      }
+                      className="text-sm text-indigo-400 font-medium bg-transparent outline-none"
+                    />
+                  ) : (
+                    <p className="text-sm text-indigo-400 font-medium">
+                      {profileData.instagramLink}
+                    </p>
+                  )}
                 </div>
+
                 <div className="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
-                  <span className="text-sm text-gray-400">GitHub</span>
-                  <span className="text-sm text-indigo-400 font-medium">github.com/alexj</span>
+                  <label className="text-sm text-gray-400">Facebook</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editForm.facebookLink}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          facebookLink: e.target.value,
+                        })
+                      }
+                      className="text-sm text-indigo-400 font-medium bg-transparent outline-none"
+                    />
+                  ) : (
+                    <p className="text-sm text-indigo-400 font-medium">
+                      {profileData.facebookLink}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -200,7 +250,9 @@ const Dashboard = () => {
 
       {/* --- Account Security Card --- */}
       <div className="bg-gray-900 rounded-2xl shadow-lg p-4 sm:p-6 md:p-8">
-        <h3 className="text-xl font-semibold text-white mb-4">Account Security</h3>
+        <h3 className="text-xl font-semibold text-white mb-4">
+          Account Security
+        </h3>
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-700 rounded-lg gap-3">
             <div>
@@ -211,10 +263,15 @@ const Dashboard = () => {
               Change Password
             </button>
           </div>
+
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-700 rounded-lg gap-3">
             <div>
-              <p className="font-medium text-gray-200">Two-Factor Authentication</p>
-              <p className="text-sm text-gray-400">Enhanced security for your account</p>
+              <p className="font-medium text-gray-200">
+                Two-Factor Authentication
+              </p>
+              <p className="text-sm text-gray-400">
+                Enhanced security for your account
+              </p>
             </div>
             <span className="bg-indigo-500 bg-opacity-20 text-indigo-300 px-3 py-1 rounded-full text-sm font-medium">
               Enabled
