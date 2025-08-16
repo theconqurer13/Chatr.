@@ -4,7 +4,8 @@ import {
   MessageCircle, 
   Bell, 
   LogOut,
-  Menu
+  Menu,
+  Search
 } from "lucide-react";
 import { Link, useNavigate, Outlet, useLocation } from "react-router-dom";
 import { UserButton, useUser, useClerk } from "@clerk/clerk-react";
@@ -30,7 +31,8 @@ const Layout = () => {
     const menuItems = [
         { id: '/profile', label: 'Profile', icon: User, path: '/profile' },
         { id: '/profile/messages', label: 'Messages', icon: MessageCircle, path: '/profile/messages' },
-        { id: '/profile/pending-requests', label: 'Pending Requests', icon: Bell, path: '/profile/pending-requests' }
+        { id: '/profile/pending-requests', label: 'Pending Requests', icon: Bell, path: '/profile/pending-requests' },
+        { id: '/profile/search-user', label: 'Search User', icon: Search, path: '/profile/search-user' }
     ];
 
     return (

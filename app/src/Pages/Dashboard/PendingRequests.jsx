@@ -1,24 +1,31 @@
 import React from 'react';
 import { Bell } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
 // Dummy data for demonstration
-const requestsData = [
-  { name: 'Jennifer Parker', role: 'UX Researcher', company: 'TechCorp', avatar: 'JP' },
-  { name: 'Robert Kim', role: 'Frontend Developer', company: 'Innovate Labs', avatar: 'RK' },
-  { name: 'Lisa Chen', role: 'Product Manager', company: 'StartupXYZ', avatar: 'LC' },
-  { name: 'Marcus Johnson', role: 'Data Scientist', company: 'Analytics Pro', avatar: 'MJ' },
-  { name: 'Sophia Williams', role: 'Marketing Director', company: 'Growth Inc.', avatar: 'SW' },
-  { name: 'Daniel Brown', role: 'Full Stack Developer', company: 'CodeCraft', avatar: 'DB' }
-];
+
 
 const PendingRequests = () => {
+  const requestsData = [
+  {id:1, name: 'Jennifer Parker', role: 'UX Researcher', company: 'TechCorp', avatar: 'JP' },
+  {id:2, name: 'Robert Kim', role: 'Frontend Developer', company: 'Innovate Labs', avatar: 'RK' },
+  {id:3, name: 'Lisa Chen', role: 'Product Manager', company: 'StartupXYZ', avatar: 'LC' },
+  {id:4, name: 'Marcus Johnson', role: 'Data Scientist', company: 'Analytics Pro', avatar: 'MJ' },
+  {id:5, name: 'Sophia Williams', role: 'Marketing Director', company: 'Growth Inc.', avatar: 'SW' },
+  {id:6, name: 'Daniel Brown', role: 'Full Stack Developer', company: 'CodeCraft', avatar: 'DB' }
+];
+  const navigate = useNavigate();
+  const handelUserClick = (userId) =>{
+    navigate(`/profile/pending-requests/${userId}`)
+  }
+
   return (
     <div className="space-y-8">
       {/* Responsive grid for request cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {requestsData.map((request, index) => (
+        {requestsData.map((request) => (
           <div 
-            key={index} 
+            key={request.id} 
+            onClick={()=>handelUserClick(request.id)}
             className="bg-gray-900 rounded-2xl shadow-lg p-6 flex flex-col transition-transform duration-300 hover:-translate-y-1"
           >
             <div className="flex items-center gap-4 mb-4">

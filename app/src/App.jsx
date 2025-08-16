@@ -9,6 +9,9 @@ import Layout from './Pages/Dashboard/Layout'
 import Dashboard from './Pages/Dashboard/Dashboard'
 import Messages from './Pages/Dashboard/Messages'
 import PendingRequests from './Pages/Dashboard/PendingRequests'
+import SearchUser from './Pages/Dashboard/SearchUser'
+import UserProfile from './components/UserProfile'
+import RequestProfile from './components/RequestProfile'
 const App = () => {
   return (
 
@@ -18,7 +21,10 @@ const App = () => {
         <Route path="/profile" element={<Layout />}>
           <Route index element={<Dashboard />} /> 
           <Route path="messages" element={<Messages />} /> 
-          <Route path="pending-requests" element={<PendingRequests />} /> 
+          <Route path="pending-requests" element={<PendingRequests />} />
+          <Route path="search-user" element={<SearchUser/>} /> 
+          <Route path="search-user/:userId" element={<UserProfile/>} />
+          <Route path="pending-requests/:userId" element={<RequestProfile/>} />
         </Route>
 
       </Routes>
