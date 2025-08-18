@@ -1,7 +1,13 @@
 ## Chatr
 
 A full‑stack chat application with Clerk authentication, a React + Vite frontend, and an Express + MongoDB backend. This README covers setup, local development, environment variables, and a place to showcase your landing page.
+### Landing Page
+Example placeholder (replace with real content):
+```md
+![Landing Page](app/src/assets/LandingPage.png)
 
+Welcome to Chatr — a secure, modern, and fast way to connect.
+```
 ### Features
 - **Authentication**: User auth via Clerk
 - **Modern UI**: React 19, Vite, Tailwind CSS, Lucide icons, toasts
@@ -93,21 +99,7 @@ npm start
 - Backend (`server`):
   - `npm start` – Start the server with Nodemon
 
-### Landing Page
-Use this section to present your product’s first impression. You can include screenshots, GIFs, or a brief walkthrough of the landing experience.
 
-- **Entry file**: `app/src/Pages/HeroSection.jsx`
-- **What to include here**:
-  - A hero screenshot or GIF
-  - Key value propositions
-  - Short call-to-action instructions (e.g., sign in to start chatting)
-
-Example placeholder (replace with real content):
-```md
-![Landing Page](app/src/assets/SecureImg.jpg)
-
-Welcome to Chatr — a secure, modern, and fast way to connect.
-```
 
 ### Clerk Setup Notes
 - In the frontend, the Clerk provider is initialized using `VITE_CLERK_PUBLISHABLE_KEY`.
@@ -122,7 +114,6 @@ The backend connects to MongoDB using `MONGODB_URL` and creates/uses a `chatting
 - Verify your Clerk keys and webhook secret if authentication or events appear to fail.
 - Confirm MongoDB is reachable from your environment.
 
-### License
-This project is provided as-is for educational and portfolio purposes. Add your preferred license if distributing.
+
 
 
