@@ -11,7 +11,8 @@ const userSchema =  mongoose.Schema({
     instagramLink:String,
     facebookLink:String,
     jobTitle:String,
-    image:{type:String,required:true}
+    image:{type:String,required:true},
+    friends:[{type:mongoose.Schema.Types.ObjectId,ref:'User'}]
 },{timestamps:true});
 
 const User = mongoose.model("User",userSchema);

@@ -200,7 +200,7 @@ const Dashboard = () => {
                         <span className="text-gray-300">
                           {field === "email"
                         ? user?.primaryEmailAddress?.emailAddress
-                        : profileData[field]}
+                        : profileData[field] || `no ${field} added`}
                         </span>
                       </div>
                   )}
@@ -247,7 +247,7 @@ const Dashboard = () => {
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
               ) : (
-                <p className="text-gray-200">{profileData.jobTitle}</p>
+                <p className="text-gray-200">{profileData.jobTitle || "No job title added yet."}</p>
               )}
             </div>  
             {/* Social Links */}
