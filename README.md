@@ -4,6 +4,7 @@ A full‑stack chat application with Clerk authentication, a React + Vite fronte
 
 ### Preview
 <img src="app/src/assets/LandingPage.png" alt="Landing page - Chatr." />
+
 ### Features
 - **Authentication**: User auth via Clerk
 - **Modern UI**: React 19, Vite, Tailwind CSS, Lucide icons, toasts
