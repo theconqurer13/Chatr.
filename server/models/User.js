@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { User } from "./User";
+
 
 const userSchema =  mongoose.Schema({
     _id:{type:String,required:true},

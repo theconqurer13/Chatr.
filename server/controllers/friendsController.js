@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 
-const friends = async (req,res)=>{
+export const friends = async (req,res)=>{
     try {
         const user = await User.findById(req.user.id);
         const friends = user.friends;
