@@ -7,6 +7,9 @@ import { clerkMiddleware } from '@clerk/express'
 import clerkrouter from './routes/clerkRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import http from 'http';
+import friendsRouter from './routes/friendsRoutes.js';
+import pendingRouter from './routes/pendingRoutes.js';
+
 connectDb();
 
 const app = express();
@@ -27,8 +30,8 @@ app.get('/',(req,res)=>{
 })
 
 app.use('/api/user',userRouter);
-
-
+app.use('/api/pending',pendingRouter);
+app.use('/api/friends',friendsRouter);
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
 })

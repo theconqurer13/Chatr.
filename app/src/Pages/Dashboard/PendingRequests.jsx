@@ -5,6 +5,15 @@ import { useNavigate } from 'react-router-dom';
 
 
 const PendingRequests = () => {
+  const [requests, setRequests] = useState([]);
+  useEffect(()=>{
+    const fetchRequests = async () =>{
+      const data = await fetch(`/api/users/${id}/pending-requests`);
+      
+      setRequests(data);
+    }
+    fetchRequests();
+  },[]);
   const requestsData = [
   {id:1, name: 'Jennifer Parker', role: 'UX Researcher', company: 'TechCorp', avatar: 'JP' },
   {id:2, name: 'Robert Kim', role: 'Frontend Developer', company: 'Innovate Labs', avatar: 'RK' },
