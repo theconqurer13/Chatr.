@@ -43,7 +43,7 @@ const Layout = () => {
             <div className="flex flex-col bg-gray-900 text-white shadow-lg transition-all duration-300 w-20 md:w-64">
                 
                 {/* User Profile */}
-                <div className="p-4 md:p-3. border-b border-gray-700">
+                <div className="p-4 md:p-3 border-b border-gray-700">
                     <div className="flex items-center justify-center md:justify-start gap-3">
                         <img
                             src={user?.imageUrl}
@@ -102,22 +102,14 @@ const Layout = () => {
             {/* --- Main Content (White/Light Theme) --- */}
             <div className="flex-1 flex flex-col overflow-hidden">
               {/* --- Top Bar (Header) --- */}
-              {/* The background is now a very light shade of indigo */}
-              <header className="bg-gray-900 shadow-sm border-b border-indigo-200/30 px-4 md:px-8 py-4.5 backdrop-blur-sm">
+              <header className="bg-gray-900 shadow-sm border-b border-gray-700 px-4 md:px-8 py-4">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <h1 className="text-xl md:text-2xl font-medium text-white self-start md:self-center">
                     {menuItems.find((item) => item.path === activeSection)?.label}
                   </h1>
                   <div className="flex items-center gap-4 w-full md:w-auto">
                     <div className="relative flex-1 md:flex-initial">
-                      <input
-                        type="text"
-                        placeholder="Search..."
-                        className="pl-10 pr-4 py-2 border border-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-full md:w-64 bg-white-400 placeholder-white"
-                      />
-                      <svg className="w-5 h-5 text-white absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
+                      <h3 className="text-white text-lg cursor-pointer" onClick={()=>navigate('/')} >Home</h3>
                     </div>
                     <UserButton afterSignOutUrl="/" />
                   </div>
@@ -125,8 +117,7 @@ const Layout = () => {
               </header>
 
               {/* --- Content Area --- */}
-              {/* The main content background is a clean, neutral gray */}
-              <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-gradient-to-b from-gray-900 to-[#380c61]">
+              <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-gradient-to-b from-gray-900 to-gray-800">
                 <Outlet />
               </main>
             </div>

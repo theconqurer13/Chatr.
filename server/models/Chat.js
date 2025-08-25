@@ -1,10 +1,8 @@
 import mongoose from "mongoose";
-import { Message } from "./Message";
-import { User } from "./User";
 
 const chatSchema = new mongoose.Schema({
     participants: {
-        type: [mongoose.Schema.Types.ObjectId],
+        type: [String],
         ref: "User",
         required: true,
     },

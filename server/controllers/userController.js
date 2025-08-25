@@ -37,9 +37,25 @@ export const getProfile = async (req, res) => {
   }
 };
 
+
+export const getUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    return res.json({success:true,data:user});
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const sendFriendRequest = async (req,res)=>{
   try {
-    const senderID = req.user.id;
+    const senderID = req.body.id;
     const receiverID = req.params.id;
     const receiver = await User.findById(receiverID);
     if(!receiver){
@@ -76,6 +92,51 @@ export const acceptFriendRequest = async (req,res)=>{
     await sender.save();
    
     return res.status(200).json({success:true,message:"Friend request accepted"});
+  } catch (error) {
+    return res.status(500).json({success:false,message:error.message});
+  }
+}
+
+export const rejectFriendRequest = async (req,res)=>{
+  try {
+    const receiverID = req.user.id;
+    const senderID = req.params.id;
+    const receiver = await User.findById(receiverID);
+    const sender = await User.findById(senderID);
+    
+    if(!sender){
+      return res.status(404).json({success:false,message:"User not found"});
+    }
+    
+    if(!receiver.friendRequests.includes(senderID)){
+      return res.status(400).json({success:false,message:"Friend request not found"});
+    }
+    
+    // Remove the friend request
+    receiver.friendRequests.pull(senderID);
+    await receiver.save();
+   
+    return res.status(200).json({success:true,message:"Friend request rejected"});
+  } catch (error) {
+    return res.status(500).json({success:false,message:error.message});
+  }
+}
+
+export const searchUser = async (req,res)=>{
+  try {
+    const parameter = req.body.parameter;
+    const users = await User.find({$or:[
+
+      {name:{$regex:parameter,$options:'i'}},
+      {email:{$regex:parameter,$options:'i'}},
+      {phoneNumber:{$regex:parameter,$options:'i'}}
+
+    ]});
+    
+    res.status(200).json({
+      success:true,
+      data:users
+    })
   } catch (error) {
     return res.status(500).json({success:false,message:error.message});
   }

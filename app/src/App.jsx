@@ -13,6 +13,7 @@ import SearchUser from './Pages/Dashboard/SearchUser'
 import UserProfile from './components/UserProfile'
 import RequestProfile from './components/RequestProfile'
 import {Toaster} from 'react-hot-toast'
+import Loader from './components/Loader'
 const App = () => {
   return (
 
@@ -27,6 +28,7 @@ const App = () => {
           <Route path="search-user" element={<SearchUser/>} /> 
           <Route path="search-user/:userId" element={<UserProfile/>} />
           <Route path="pending-requests/:userId" element={<RequestProfile/>} />
+          {/* <Route path="loader" element={<Loader/>} /> */}
         </Route>
 
       </Routes>

@@ -1,7 +1,3 @@
-
-
-
-
 import express from "express";
 import  clerkWebhooks  from "../controllers/clerkWebhooks.js";
 import bodyParser from "body-parser";

@@ -3,10 +3,12 @@ import { Edit2, Check, X ,Instagram, Facebook,Phone, Mail, MapPin,} from "lucide
 import { useAppContext } from "../../context/AppContext";
 import toast from "react-hot-toast";
 import { useClerk} from "@clerk/clerk-react";
+import Loader from "../../components/Loader";
 const Dashboard = () => {
   const { user, getToken, axios } = useAppContext();
   // account section
   const { openUserProfile } = useClerk();
+  const [loading,setLoading] = useState(false);
   const lastChanged = user.passwordUpdatedAt;
   const [displayText,setDisplayText] = useState("Never changed");
    if (lastChanged) {
@@ -45,6 +47,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        setLoading(true);
         const res = await axios.get("/api/user/profile", {
           headers: { Authorization: `Bearer ${await getToken()}` },
         });
@@ -60,12 +63,17 @@ const Dashboard = () => {
         }
       } catch (err) {
         console.error(err);
+      }finally{
+        setLoading(false);
       }
     };
 
     if (user) fetchProfile();
   }, [user]);
 
+  if(loading){
+    return <Loader/>
+  }
   // Save profile handler
   const handleSave = async () => {
     try {
