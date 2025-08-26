@@ -12,8 +12,8 @@ const userSchema =  mongoose.Schema({
     facebookLink:String,
     jobTitle:String,
     image:{type:String,required:true},
-    friends:[{type:String,ref:'User'}],
-    friendRequests:[{type:String,ref:'User'}]
+    friends:[{type:String,ref:'User',unique:true}],
+    friendRequests:[{type:String,ref:'User',unique:true}]
 },{timestamps:true});
 
 const User = mongoose.model("User",userSchema);

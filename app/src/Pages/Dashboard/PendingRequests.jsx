@@ -5,7 +5,7 @@ import { useAppContext } from '../../context/AppContext';
 import toast from 'react-hot-toast';
 import Loader from '../../components/Loader';
 const PendingRequests = () => {
-  const {axios,requestStatus,setRequestStatus,getToken,user} = useAppContext();
+  const {axios,requestStatus,setRequestStatus,getToken,user,sent,setSent} = useAppContext();
   const {id} = useParams();
   const [requests,setRequests] = useState([]);
   const [loading,setLoading] = useState(false);
@@ -26,6 +26,45 @@ const PendingRequests = () => {
       toast.error(error.message);
     }finally{
       setLoading(false);
+    }
+  }
+
+  const handelAccept = async (id) =>{
+    try {
+      const {data} = await axios.post(`/api/user/${id}/acceptFriendRequest`,{},{
+        headers:{
+          Authorization:`Bearer ${await getToken()}`
+        }
+      });
+      if(data.success){
+        toast.success(data.message);
+        setSent(true);
+        fetchRequest();
+      }else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.error('Accept error:', error.response?.data);
+      toast.error(error.response?.data?.message || error.message);
+    }
+  }
+
+  const handelDecline = async (id) =>{
+    try {
+      const {data} = await axios.post(`/api/user/${id}/declineFriendRequest`,{},{
+        headers:{
+          Authorization:`Bearer ${await getToken()}`
+        }
+      });
+      if(data.success){
+        toast.success(data.message);
+        setSent(true);
+        fetchRequest();
+      }else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
   }
   
@@ -53,7 +92,7 @@ const PendingRequests = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {requests.map((request) => (
             <div 
-              key={request.id} 
+              key={request._id} 
               onClick={()=>handelUserClick(request._id)}
               className="bg-gray-900 rounded-2xl shadow-lg p-6 flex flex-col transition-transform duration-300 hover:-translate-y-1"
             >
@@ -73,10 +112,14 @@ const PendingRequests = () => {
                 {request.bio || 'No bio' }
               </p>
               <div className="flex gap-3 mt-auto">
-                <button className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
+                <button className={`flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium ${sent ? 'opacity-50 cursor-not-allowed' : ''}`}
+                 onClick={()=>{handelAccept(request._id) 
+                }} 
+                >
                   Accept
                 </button>
-                <button className="flex-1 border border-gray-600 text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium">
+                <button className={`flex-1 border border-gray-600 text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium ${sent ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={()=>{handelDecline(request._id)
+                }}>
                   Decline
                 </button>
               </div>

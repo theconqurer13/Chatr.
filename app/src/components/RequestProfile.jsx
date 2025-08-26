@@ -17,7 +17,7 @@ import toast from 'react-hot-toast';
 import Loader from './Loader';
 const RequestProfile = () => {
   const [loading, setLoading] = useState(true); 
-  const {axios,getToken} = useAppContext();
+  const {axios,getToken,sent,setSent} = useAppContext();
   const [user,setUser] = useState();
   const {userId} = useParams();
   const navigate = useNavigate();
@@ -41,6 +41,43 @@ const RequestProfile = () => {
       setLoading(false);
     }
   }
+
+  const handelAccept = async (id) =>{
+    try {
+      const {data} = await axios.post(`/api/user/${id}/acceptFriendRequest`,{},{
+        headers:{
+          Authorization:`Bearer ${await getToken()}`
+        }
+      });
+      if(data.success){
+        toast.success(data.message);
+        setSent(true);
+      }else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
+  const handelDecline = async (id) =>{
+    try {
+      const {data} = await axios.post(`/api/user/${id}/declineFriendRequest`,{},{
+        headers:{
+          Authorization:`Bearer ${await getToken()}`
+        }
+      });
+      if(data.success){
+        toast.success(data.message);
+        setSent(true);
+      }else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
   useEffect(()=>{
     fetchUser(userId);
     // const interval = setInterval(() => {
@@ -110,13 +147,14 @@ const RequestProfile = () => {
               
               <div className="flex gap-3 mt-4 sm:mt-0">
                 <button
-                  onClick={handleConnectionAction}
-                  className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                  onClick={()=>handelAccept(user._id)}
+                  className={`bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium ${sent ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Accept
                 </button>
                 <button
-                  className="border border-gray-600 text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                  onClick={()=>handelDecline(user._id)}
+                  className={`border border-gray-600 text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium ${sent ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Decline
                 </button>

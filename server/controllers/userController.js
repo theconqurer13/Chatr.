@@ -76,14 +76,32 @@ export const acceptFriendRequest = async (req,res)=>{
   try {
     const receiverID = req.user.id;
     const senderID = req.params.id;
+    
+    console.log('Accept request - ReceiverID:', receiverID, 'SenderID:', senderID);
+    
     const receiver = await User.findById(receiverID);
     const sender = await User.findById(senderID);
+    
     if(!sender){
       return res.status(404).json({success:false,message:"User not found"});
     }
-    if(!receiver.friendRequests.includes(senderID)){
-      return res.status(400).json({success:false,message:"Friend request not found"});
+    
+    if(!receiver){
+      return res.status(404).json({success:false,message:"Receiver not found"});
     }
+    
+    console.log('Receiver friendRequests:', receiver.friendRequests);
+    console.log('Looking for senderID:', senderID);
+    
+    if(!receiver.friendRequests.includes(senderID)){
+      return res.status(400).json({success:false,message:"Friend request not found in your requests"});
+    }
+    
+    // Check if already friends
+    if(receiver.friends.includes(senderID)){
+      return res.status(400).json({success:false,message:"Already friends"});
+    }
+    
     receiver.friends.push(senderID);
     sender.friends.push(receiverID);
     receiver.friendRequests.pull(senderID);
@@ -93,6 +111,7 @@ export const acceptFriendRequest = async (req,res)=>{
    
     return res.status(200).json({success:true,message:"Friend request accepted"});
   } catch (error) {
+    console.error('Accept friend request error:', error);
     return res.status(500).json({success:false,message:error.message});
   }
 }
@@ -126,11 +145,8 @@ export const searchUser = async (req,res)=>{
   try {
     const parameter = req.body.parameter;
     const users = await User.find({$or:[
-
       {name:{$regex:parameter,$options:'i'}},
       {email:{$regex:parameter,$options:'i'}},
-      {phoneNumber:{$regex:parameter,$options:'i'}}
-
     ]});
     
     res.status(200).json({

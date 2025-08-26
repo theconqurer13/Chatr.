@@ -12,9 +12,10 @@ export const AppProvider = ({children})=>{
     const {user} = useUser();
     const {getToken} = useAuth();
     const [requestStatus,setRequestStatus] = useState('pending');
-
+    const [sent,setSent] = useState(false);
+    const [requestSent,setRequestSent] = useState(false);
     const value = {
-        navigate,user,getToken,axios,requestStatus,setRequestStatus
+        navigate,user,getToken,axios,requestStatus,setRequestStatus,sent,setSent,requestSent,setRequestSent
     }
 
      return (
