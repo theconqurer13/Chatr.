@@ -35,7 +35,7 @@ const clerkWebhooks = async (req, res) => {
         _id: data.id,
         email: data.email_addresses?.[0]?.email_address || "",
         name: `${data.first_name || ""} ${data.last_name || ""}`.trim() || "Unknown User",
-        image: data.image_url || "https://via.placeholder.com/150", // Provide default image if missing
+        image: data.profile_image_url || data.image_url || "https://via.placeholder.com/150", // Use profile_image_url first
       };
 
       console.log("📝 Processed userData:", JSON.stringify(userData, null, 2));
