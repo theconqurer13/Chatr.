@@ -29,19 +29,29 @@ const clerkWebhooks = async (req, res) => {
 
     // Handle events
     if (type === "user.created") {
+      console.log("🔍 Raw Clerk data:", JSON.stringify(data, null, 2));
+      
       const userData = {
         _id: data.id,
         email: data.email_addresses?.[0]?.email_address || "",
-        name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
-        image: data.image_url || "",
+        name: `${data.first_name || ""} ${data.last_name || ""}`.trim() || "Unknown User",
+        image: data.image_url || "https://via.placeholder.com/150", // Provide default image if missing
       };
 
-      const existingUser = await User.findById(data.id);
-      if (!existingUser) {
-        await User.create(userData);
-        console.log("✅ New user saved:", userData.email);
-      } else {
-        console.log("ℹ️ User already exists:", userData.email);
+      console.log("📝 Processed userData:", JSON.stringify(userData, null, 2));
+
+      try {
+        const existingUser = await User.findById(data.id);
+        if (!existingUser) {
+          const newUser = await User.create(userData);
+          console.log("✅ New user saved:", userData.email, "ID:", newUser._id);
+        } else {
+          console.log("ℹ️ User already exists:", userData.email);
+        }
+      } catch (dbError) {
+        console.error("❌ Database Error during user creation:", dbError.message);
+        console.error("📋 Failed userData:", JSON.stringify(userData, null, 2));
+        throw dbError;
       }
     }
 

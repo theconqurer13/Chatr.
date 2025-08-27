@@ -14,7 +14,10 @@ connectDb();
 
 const app = express();
 const server = http.createServer(app);
+
+// IMPORTANT: Webhook route MUST come before express.json() to preserve raw body
 app.use("/api/clerk/webhooks", clerkrouter);
+
 app.use(cors());
 // Middleware
 app.use(express.json({limit:"5mb"}));
@@ -35,5 +38,3 @@ app.use('/api/friends',friendsRouter);
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
 })
-
-
