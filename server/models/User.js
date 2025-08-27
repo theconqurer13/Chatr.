@@ -11,7 +11,7 @@ const userSchema =  mongoose.Schema({
     instagramLink:String,
     facebookLink:String,
     jobTitle:String,
-    image:{type:String,required:true},
+    image:{type:String},
     friends:[{type:String,ref:'User',unique:true}],
     friendRequests:[{type:String,ref:'User',unique:true}]
 },{timestamps:true});

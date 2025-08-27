@@ -41,15 +41,25 @@ const clerkWebhooks = async (req, res) => {
       console.log("📝 Processed userData:", JSON.stringify(userData, null, 2));
 
       try {
+        console.log("🔍 Checking if user exists with ID:", data.id);
         const existingUser = await User.findById(data.id);
+        
         if (!existingUser) {
+          console.log("👤 Creating new user...");
           const newUser = await User.create(userData);
-          console.log("✅ New user saved:", userData.email, "ID:", newUser._id);
+          console.log("✅ New user saved successfully:", userData.email, "ID:", newUser._id);
+          console.log("📊 User document:", JSON.stringify(newUser.toObject(), null, 2));
         } else {
           console.log("ℹ️ User already exists:", userData.email);
         }
       } catch (dbError) {
-        console.error("❌ Database Error during user creation:", dbError.message);
+        console.error("❌ Database Error during user creation:");
+        console.error("   Error name:", dbError.name);
+        console.error("   Error message:", dbError.message);
+        console.error("   Error code:", dbError.code);
+        if (dbError.errors) {
+          console.error("   Validation errors:", JSON.stringify(dbError.errors, null, 2));
+        }
         console.error("📋 Failed userData:", JSON.stringify(userData, null, 2));
         throw dbError;
       }
@@ -61,22 +71,54 @@ const clerkWebhooks = async (req, res) => {
         name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
         image: data.image_url || "",
       };
-      await User.findByIdAndUpdate(data.id, userData, { new: true });
-      console.log("🔄 User updated:", userData.email);
+      try {
+        console.log("🔄 Updating user with ID:", data.id);
+        const updatedUser = await User.findByIdAndUpdate(data.id, userData, { new: true });
+        console.log("✅ User updated successfully:", userData.email);
+        console.log("📊 Updated user document:", JSON.stringify(updatedUser.toObject(), null, 2));
+      } catch (dbError) {
+        console.error("❌ Database Error during user update:");
+        console.error("   Error name:", dbError.name);
+        console.error("   Error message:", dbError.message);
+        console.error("   Error code:", dbError.code);
+        if (dbError.errors) {
+          console.error("   Validation errors:", JSON.stringify(dbError.errors, null, 2));
+        }
+        console.error("📋 Failed userData:", JSON.stringify(userData, null, 2));
+        throw dbError;
+      }
     }
 
     else if (type === "user.deleted") {
-      await User.findByIdAndDelete(data.id);
-      console.log("❌ User deleted:", data.id);
+      try {
+        console.log("❌ Deleting user with ID:", data.id);
+        await User.findByIdAndDelete(data.id);
+        console.log("✅ User deleted successfully:", data.id);
+      } catch (dbError) {
+        console.error("❌ Database Error during user deletion:");
+        console.error("   Error name:", dbError.name);
+        console.error("   Error message:", dbError.message);
+        console.error("   Error code:", dbError.code);
+        if (dbError.errors) {
+          console.error("   Validation errors:", JSON.stringify(dbError.errors, null, 2));
+        }
+        console.error("📋 Failed user ID:", data.id);
+        throw dbError;
+      }
     }
 
     else {
       console.log("⚠️ Unhandled event type:", type);
     }
 
+    console.log("🎯 Webhook processed successfully, sending 200 response");
     res.status(200).json({ success: true, message: "Webhook received" });
   } catch (error) {
-    console.error("❌ Webhook Error:", error.message);
+    console.error("❌ Webhook Error:");
+    console.error("   Error name:", error.name);
+    console.error("   Error message:", error.message);
+    console.error("   Stack trace:", error.stack);
+    console.log("🚫 Sending 400 response due to error");
     res.status(400).json({ success: false, message: error.message });
   }
 };
