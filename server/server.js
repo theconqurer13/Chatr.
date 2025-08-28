@@ -17,11 +17,11 @@ const server = http.createServer(app);
 
 // IMPORTANT: Webhook route MUST come before express.json() to preserve raw body
 app.use("/api/clerk/webhooks", clerkrouter);
-
+app.use(clerkMiddleware())
 app.use(cors());
 // Middleware
 app.use(express.json({limit:"5mb"}));
-app.use(clerkMiddleware())
+
 // API to listen Clerk Webhooks
 
 const PORT = 3002;

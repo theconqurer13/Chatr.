@@ -29,26 +29,21 @@ const clerkWebhooks = async (req, res) => {
 
     // Handle events
     if (type === "user.created") {
-      console.log("🔍 Raw Clerk data:", JSON.stringify(data, null, 2));
       
       const userData = {
         _id: data.id,
         email: data.email_addresses?.[0]?.email_address || "",
         name: `${data.first_name || ""} ${data.last_name || ""}`.trim() || "Unknown User",
-        image: data.profile_image_url || data.image_url || "https://via.placeholder.com/150", // Use profile_image_url first
+        image:  data.profile_image_url || data.image_url ||"", // Use profile_image_url first
       };
-
-      console.log("📝 Processed userData:", JSON.stringify(userData, null, 2));
-
       try {
-        console.log("🔍 Checking if user exists with ID:", data.id);
+        
         const existingUser = await User.findById(data.id);
         
         if (!existingUser) {
-          console.log("👤 Creating new user...");
+          
           const newUser = await User.create(userData);
-          console.log("✅ New user saved successfully:", userData.email, "ID:", newUser._id);
-          console.log("📊 User document:", JSON.stringify(newUser.toObject(), null, 2));
+          
         } else {
           console.log("ℹ️ User already exists:", userData.email);
         }
