@@ -1,21 +1,37 @@
 import User from "../models/User.js";
+import {v2 as cloudinary} from "cloudinary";
+import "../configs/cloudinary.js"; // Ensure cloudinary is configured
 
 export const updateProfile = async (req, res) => {
   try {
-    const { phoneNumber, location, bio, jobTitle, instagramLink, facebookLink } = req.body;
-
+    const { phoneNumber, location, bio, jobTitle, instagramLink, facebookLink,name,email } = req.body;
+    let imageUrl = null;
+    
     // yaha tum apni DB me user find karke update karoge
     // maan lo userId token se aa raha hai
-    const userId = req.user.id;
+    const userId = req.userId;
+    
+    if(req.file){
+      const result = await cloudinary.uploader.upload(req.file.path);
+      imageUrl = result?.secure_url;
+    }
+    
+    // Only update imageUrl if a new image was uploaded
+    const updateData = { phoneNumber, location, bio, jobTitle, instagramLink, facebookLink,name,email};
+    if (imageUrl) {
+      updateData.imageUrl = imageUrl;
 
+    }
+    
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { phoneNumber, location, bio, jobTitle, instagramLink, facebookLink },
+      updateData,
       { new: true }
     );
 
     return res.json({ success: true, data: updatedUser });
   } catch (error) {
+    console.error("Update profile error:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -24,7 +40,7 @@ export const updateProfile = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const user = await User.findById(userId);
 
     if (!user) {
@@ -55,7 +71,7 @@ export const getUser = async (req, res) => {
 
 export const sendFriendRequest = async (req,res)=>{
   try {
-    const senderID = req.body.id;
+    const senderID = req.userId;
     const receiverID = req.params.id;
     const receiver = await User.findById(receiverID);
     if(!receiver){
@@ -74,7 +90,7 @@ export const sendFriendRequest = async (req,res)=>{
 
 export const acceptFriendRequest = async (req,res)=>{
   try {
-    const receiverID = req.user.id;
+    const receiverID = req.userId;
     const senderID = req.params.id;
     
     console.log('Accept request - ReceiverID:', receiverID, 'SenderID:', senderID);
@@ -118,7 +134,7 @@ export const acceptFriendRequest = async (req,res)=>{
 
 export const rejectFriendRequest = async (req,res)=>{
   try {
-    const receiverID = req.user.id;
+    const receiverID = req.userId;
     const senderID = req.params.id;
     const receiver = await User.findById(receiverID);
     const sender = await User.findById(senderID);
@@ -144,14 +160,15 @@ export const rejectFriendRequest = async (req,res)=>{
 export const searchUser = async (req,res)=>{
   try {
     const parameter = req.body.parameter;
+    const userId = req.userId;
     const users = await User.find({$or:[
       {name:{$regex:parameter,$options:'i'}},
       {email:{$regex:parameter,$options:'i'}},
     ]});
-    
+    const filteredUsers = users.filter(user => user._id.toString() !== userId);
     res.status(200).json({
       success:true,
-      data:users
+      data:filteredUsers
     })
   } catch (error) {
     return res.status(500).json({success:false,message:error.message});

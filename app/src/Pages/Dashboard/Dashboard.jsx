@@ -1,32 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { Edit2, Check, X ,Instagram, Facebook,Phone, Mail, MapPin,} from "lucide-react";
+import { Edit2, Check, X, Instagram, Facebook, Phone, Mail, MapPin } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 import toast from "react-hot-toast";
-import { useClerk} from "@clerk/clerk-react";
 import Loader from "../../components/Loader";
+
 const Dashboard = () => {
-  const { user, getToken, axios } = useAppContext();
-  // account section
-  const { openUserProfile } = useClerk();
-  const [loading,setLoading] = useState(false);
-  const lastChanged = user.passwordUpdatedAt;
-  const [displayText,setDisplayText] = useState("Never changed");
-   if (lastChanged) {
-    const date = new Date(lastChanged);
-    const now = new Date();
-    const diff = Math.floor((now - date) / (1000 * 60 * 60 * 24)); // difference in days
-
-    if (diff === 0) setDisplayText("Changed today");
-    else if (diff === 1) setDisplayText("Changed 1 day ago");
-    else setDisplayText(`Changed ${diff} days ago`) ;
-  }
-
-
-
+  const { user, token, axios, setUser } = useAppContext();
+  const [loading, setLoading] = useState(false);
+  const [displayText, setDisplayText] = useState("Never changed");
   
-  const [isEditing, setIsEditing] = useState(false);
+  const lastChanged = user?.passwordUpdatedAt;
+  
+  useEffect(() => {
+    if (lastChanged) {
+      const date = new Date(lastChanged);
+      const now = new Date();
+      const diff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
 
-  // Static data for fields not available from Clerk user object
+      if (diff === 0) setDisplayText("Changed today");
+      else if (diff === 1) setDisplayText("Changed 1 day ago");
+      else setDisplayText(`Changed ${diff} days ago`);
+    }
+  }, [lastChanged]);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  // Static data for fields not available from user object
   const [profileData, setProfileData] = useState({
     phoneNumber: "",
     location: "",
@@ -34,12 +33,13 @@ const Dashboard = () => {
     jobTitle: "",
     instagramLink: "",
     facebookLink: "",
+    imageUrl: "",
   });
 
-  // Form state initialized with Clerk and static data
+  // Form state initialized with user and static data
   const [editForm, setEditForm] = useState({
     name: user?.fullName || "",
-    email: user?.primaryEmailAddress?.emailAddress || "",
+    email: user?.email || "",
     ...profileData,
   });
 
@@ -49,7 +49,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const res = await axios.get("/api/user/profile", {
-          headers: { Authorization: `Bearer ${await getToken()}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (res.data.success) {
@@ -57,7 +57,7 @@ const Dashboard = () => {
           setEditForm((prev) => ({
             ...prev,
             name: user?.fullName || "",
-            email: user?.primaryEmailAddress?.emailAddress || "",
+            email: user?.email || "",
             ...res.data.data,
           }));
         }
@@ -69,52 +69,75 @@ const Dashboard = () => {
     };
 
     if (user) fetchProfile();
-  }, [user]);
+  }, [user, token]);
 
-  if(loading){
-    return <Loader/>
-  }
+  
   // Save profile handler
   const handleSave = async () => {
     try {
+      // Create FormData for file upload
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('name', editForm.name);
+      formData.append('email', editForm.email);
+      formData.append('phoneNumber', editForm.phoneNumber);
+      formData.append('location', editForm.location);
+      formData.append('bio', editForm.bio);
+      formData.append('jobTitle', editForm.jobTitle);
+      formData.append('instagramLink', editForm.instagramLink);
+      formData.append('facebookLink', editForm.facebookLink);
+      
+      // Only append image if a new one was selected
+      if (previewImage) {
+        formData.append('imageUrl', previewImage);
+      }
+
       const res = await axios.post(
         "/api/user/updateProfile",
-        {
-          phoneNumber: editForm.phoneNumber,
-          location: editForm.location,
-          bio: editForm.bio,
-          jobTitle: editForm.jobTitle,
-          instagramLink: editForm.instagramLink,
-          facebookLink: editForm.facebookLink,
-        },
+        formData,
         {
           headers: {
-            Authorization: `Bearer ${await getToken()}`,
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
           },
         }
       );
 
       if (res.data.success) {
-        setProfileData(editForm);
+        // Update profile data with response data
+        setProfileData({
+          ...editForm,
+          imageUrl: res.data.data.imageUrl || profileData.imageUrl
+        });
+        
+        // Update user context with new data
+        setUser(res.data.data);
+        
         setIsEditing(false);
+        setPreviewImage(null); // Clear preview
         toast.success("Profile updated successfully");
       } else {
-        toast.error(res.data.message);
+        toast.error(res.data.message || "Failed to update profile");
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error("Profile update error:", error);
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    }finally{
+      setLoading(false);
     }
   };
 
   const handleCancel = () => {
     setEditForm({
       name: user?.fullName || "",
-      email: user?.primaryEmailAddress?.emailAddress || "",
+      email: user?.email || "",
       ...profileData,
     });
     setIsEditing(false);
   };
-
+  if(loading){
+    return <Loader/>
+  }
   return (
     <div className="space-y-6">
       {/* --- Profile Information Card --- */}
@@ -157,13 +180,21 @@ const Dashboard = () => {
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="relative">
                 <img
-                  src={user?.imageUrl}
+                  src={previewImage ? URL.createObjectURL(previewImage) : user?.imageUrl}
                   alt="Profile"
                   className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-indigo-500"
                 />
                 {isEditing && (
-                  <button className="absolute bottom-1 right-1 bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 transition-colors">
-                    <Edit2 size={16} />
+                  <button className="absolute bottom-1 right-1 bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 transition-colors" >
+                    <label htmlFor="profileImage" className="cursor-pointer">
+                      <input type="file" id="profileImage" className="hidden" onChange={(e)=>{setPreviewImage(e.target.files[0])
+                        setEditForm({
+                          ...editForm,
+                          imageUrl:e.target.files[0]
+                        })
+                      }}/>
+                      <Edit2 size={16} />
+                    </label>
                   </button>
                 )}
               </div>
@@ -199,7 +230,7 @@ const Dashboard = () => {
                         setEditForm({ ...editForm, [field]: e.target.value })
                       }
                       className="w-full px-3 py-2 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      readOnly={field === "email"} // Clerk email not editable
+                      readOnly={field === "email"} // Email not editable
                     />
                   ) : (
 
@@ -207,7 +238,7 @@ const Dashboard = () => {
                         
                         <span className="text-gray-300">
                           {field === "email"
-                        ? user?.primaryEmailAddress?.emailAddress
+                        ? user?.email
                         : profileData[field] || `no ${field} added`}
                         </span>
                       </div>
@@ -338,7 +369,7 @@ const Dashboard = () => {
               <p className="font-medium text-gray-200">Password</p>
               <p className="text-sm text-gray-400"> {displayText}</p>
             </div>
-            <button  onClick={() => openUserProfile()} className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors self-start sm:self-center">
+            <button  onClick={() => console.log("Change Password")} className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors self-start sm:self-center">
               Change Password
             </button>
           </div>

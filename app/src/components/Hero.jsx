@@ -1,74 +1,86 @@
-import { useClerk, UserButton, useUser } from '@clerk/clerk-react';
-import React, { useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Features from './Features';
 import Footer from './Footer';
 import { useRef } from 'react';
+import { useAppContext } from '../context/AppContext';
+import Loader from '../components/Loader';
 
 const Hero = () => {
-      const [isMenuOpen, setIsMenuOpen] = useState(false);
-     const navigate = useNavigate();
-    const {openSignIn} = useClerk();
-    const {user,isSignedIn} = useUser();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const navigate = useNavigate();
+    const { user, isAuthenticated, logout, loading } = useAppContext();
     const featureRef = useRef(null);
-    const scrollToSection = (ref)=>{
-        ref.current?.scrollIntoView({behavior: 'smooth'});
-        
+
+    // useEffect(() => {
+    //     if (isAuthenticated) {
+    //         navigate("/profile");
+    //     }
+    // }, [isAuthenticated, navigate]);
+
+    if (loading) {
+        return <Loader/>
     }
 
-     const handleClick = async () => {
-        if (isSignedIn) {
-        navigate("/profile");
+    const scrollToSection = (ref) => {
+        ref.current?.scrollIntoView({behavior: 'smooth'});
+    }
+
+    const handleClick = () => {
+        if (isAuthenticated) {
+            navigate("/profile");
         } else {
-         openSignIn({ afterSignInUrl: "/profile" });
+            navigate("/signin");
         }
     };
 
     return (
         <>
-
-            <section className="flex flex-col items-center  text-white pb-16 text-sm ">
+            <section className="flex flex-col items-center text-white pb-16 text-sm">
                 <img src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/hero/gridPatternBg.svg" alt="hero-bg" className="absolute bottom-0 left-0 w-full pointer-events-none" />
                 <nav className="flex items-center justify-between p-4 md:px-16 lg:px-24 xl:px-32 md:py-6 w-full">
                     <h1 className='text-2xl font-medium cursor-pointer' onClick={() => navigate('/')}>chatr.</h1>
                     <div
                         className={`max-md:absolute max-md:top-0 max-md:z-10 max-md:left-0 max-md:h-full max-md:bg-black/50 max-md:backdrop-blur max-md:flex-col max-md:justify-center flex items-center gap-8 font-medium max-md:transition-all max-md:duration-300 max-md:overflow-hidden ${isMenuOpen ? 'max-md:w-full' : 'max-md:w-0'}`}
                     >
-                        <a href="#"  className="hover:text-gray-300">Home</a>
-                        <a href="#" onClick={()=> scrollToSection(featureRef)} className="hover:text-gray-300">Features</a>
-                        <a href="#" className="hover:text-gray-300">Pricing</a>
+                        <a href="#" className="hover:text-gray-300">Home</a>
+                        <a href="#" onClick={() => scrollToSection(featureRef)} className="hover:text-gray-300">Features</a>
 
-                        {user ? (
-                        <UserButton className="block" /> // logged in hone par har size pe show
+                        {isAuthenticated ? (
+                            <div className="flex items-center gap-4">
+                                <span className="text-gray-300">Hi, {user?.name}</span>
+                                <button
+                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-medium transition"
+                                    onClick={logout}
+                                >
+                                    Logout
+                                </button>
+                            </div>
                         ) : (
-                        <>
-                            {/* Small screen */}
-                            <button
-                            className="md:hidden bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-medium transition"
-                            onClick={openSignIn}
-                            >
-                            Sign up
-                            </button>
-                            {/* Medium and above */}
-                            <button
-                            className="hidden md:block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full font-medium transition"
-                            onClick={openSignIn}
-                            >
-                            Sign up
-                            </button>
-                        </>
+                            <>
+                                {/* Small screen */}
+                                <Link
+                                    to="/signin"
+                                    className="md:hidden bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-medium transition"
+                                >
+                                    Sign In
+                                </Link>
+                                {/* Medium and above */}
+                                <Link
+                                    to="/signin"
+                                    className="hidden md:block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full font-medium transition"
+                                >
+                                    Sign In
+                                </Link>
+                            </>
                         )}
 
-                        
                         <button onClick={() => setIsMenuOpen(false)} className="md:hidden bg-gray-900 hover:bg-gray-800 text-white p-2 rounded-md aspect-square font-medium transition">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M18 6 6 18" /><path d="m6 6 12 12" />
                             </svg>
                         </button>
                     </div>
-                            
-                    
-                    
 
                     <button onClick={() => setIsMenuOpen(true)} className="md:hidden bg-gray-900 hover:bg-gray-800 text-white p-2 rounded-md aspect-square font-medium transition">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -93,15 +105,11 @@ const Hero = () => {
                     A simple, secure, and lightning-fast way to bring your team together — no matter where they are
                 </p>
 
-                <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 mt-20 rounded-full transition " onClick={()=>{
-                    if(isSignedIn){
-                        handleClick();
-                    }else{
-                        openSignIn()
-                    }
-                }}>
-                  {isSignedIn ? <span>Start Chatting</span> : <span>Get Started for Free</span>}
-                    
+                <button
+                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 mt-20 rounded-full transition"
+                    onClick={handleClick}
+                >
+                    {isAuthenticated ? <span>Start Chatting</span> : <span>Get Started for Free</span>}
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4.166 10h11.667m0 0L9.999 4.167M15.833 10l-5.834 5.834" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -109,7 +117,6 @@ const Hero = () => {
                 <section ref={featureRef}>
                     <Features />
                 </section>
-               
             </section>
         </>
     );

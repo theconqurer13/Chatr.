@@ -8,18 +8,18 @@ import debounce from 'lodash.debounce';
 const SearchUser = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [Users, setUsers] = useState([]);
-  const { axios, getToken, navigate, user } = useAppContext();
+  const { axios, token, navigate, user } = useAppContext(); 
   const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
 
   const fetchUsers = async () => {
-    if (!searchTerm.trim()) return; // blank search ke liye API call mat karo
+    if (!searchTerm.trim()) return; 
     try {
       setLoading(true);
       const response = await axios.post(
         '/api/user/search-user',
         { parameter: searchTerm.trim() },
-        { headers: { Authorization: `Bearer ${await getToken()}` } }
+        { headers: { Authorization: `Bearer ${token}` } } 
       );
 
       if (response.data.success) {
@@ -30,12 +30,11 @@ const SearchUser = () => {
           usersData = [response.data.data];
         }
 
-        // 🔥 Apna user filter out + agar already friend hai to mark
         const filteredUsers = usersData
           .filter((searchUser) => searchUser._id !== user._id)
           .map((u) => ({
             ...u,
-            isFriend: user.friends?.includes(u._id) || false, // user.friends array check
+            isFriend: user.friends?.includes(u._id) || false, 
           }));
 
         setUsers(filteredUsers);
@@ -47,6 +46,7 @@ const SearchUser = () => {
         toast.error(response.data.message || 'Failed to search users');
       }
     } catch (error) {
+      console.error('Search error:', error);
       toast.error(error.response?.data?.message || 'Failed to search users');
     } finally {
       setLoading(false);
@@ -61,7 +61,7 @@ const SearchUser = () => {
       const response = await axios.post(
         `/api/user/${userId}/sendFriendRequest`,
         {},
-        { headers: { Authorization: `Bearer ${await getToken()}` } }
+        { headers: { Authorization: `Bearer ${token}` } } 
       );
       if (response.data.success) {
         toast.success(response.data.message);
@@ -70,13 +70,12 @@ const SearchUser = () => {
             u._id === userId ? { ...u, requestSent: true } : u
           )
         );
-        is
       } else {
         toast.error(response.data.message);
       }
     } catch (error) {
       console.error('Connect error:', error);
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(error.response?.data?.message || 'Failed to send friend request');
     } finally {
       setLoading(false);
     }
@@ -90,7 +89,7 @@ const SearchUser = () => {
     if (searchTerm.trim()) {
       debouncedFetch();
     } else {
-      setUsers([]); // blank hone pe results clear
+      setUsers([]); 
     }
     inputRef.current?.focus();
     return () => debouncedFetch.cancel();
@@ -141,18 +140,21 @@ const SearchUser = () => {
               <div>
                 <div className="flex items-start gap-4 mb-4">
                   <img
-                    src={usr.image}
+                    src={usr.imageUrl || '/default-avatar.png'} 
                     alt={usr.name}
-                    className="w-12 h-12 rounded-full flex-shrink-0"
+                    className="w-12 h-12 rounded-full flex-shrink-0 object-cover border-2 border-indigo-500"
+                    onError={(e) => {
+                      e.target.src = '/default-avatar.png';
+                    }}
                   />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-white text-lg">{usr.name}</h3>
-                    <p className="text-indigo-400 font-medium">{usr.jobTitle}</p>
-                    <p className="text-gray-500 text-sm mt-1">{usr.location}</p>
+                    <p className="text-indigo-400 font-medium">{usr.jobTitle || 'No title'}</p>
+                    <p className="text-gray-500 text-sm mt-1">{usr.location || 'No location'}</p>
                   </div>
                 </div>
                 <p className="text-sm text-gray-300 mb-6">
-                  {usr.bio || 'No bio'}
+                  {usr.bio || 'No bio available'}
                 </p>
               </div>
 
@@ -188,7 +190,7 @@ const SearchUser = () => {
       )}
 
       {/* No Results State */}
-      {searchTerm.trim() && Users.length === 0 && (
+      {searchTerm.trim() && Users.length === 0 && !loading && (
         <div className="text-center py-16">
           <div className="w-24 h-24 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 border border-gray-700">
             <Search size={40} className="text-gray-400" />

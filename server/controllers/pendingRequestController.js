@@ -2,7 +2,7 @@ import User from "../models/User.js";
 
 export const getPendingRequests = async (req,res)=>{
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.userId);
     if(!user){
       return res.status(404).json({success:false,message:"User not found"});
     }

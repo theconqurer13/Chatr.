@@ -8,11 +8,10 @@ import {
   Search
 } from "lucide-react";
 import { Link, useNavigate, Outlet, useLocation } from "react-router-dom";
-import { UserButton, useUser, useClerk } from "@clerk/clerk-react";
+import { useAppContext } from "../../context/AppContext";
 
 const Layout = () => {
-    const { user, isSignedIn } = useUser();
-    const { signOut } = useClerk();
+    const { user, logout, isAuthenticated } = useAppContext();
     const location = useLocation();
     const navigate = useNavigate();
     const [activeSection, setActiveSection] = useState(location.pathname);
@@ -22,12 +21,13 @@ const Layout = () => {
         setActiveSection(location.pathname);
     }, [location.pathname]);
 
-    // Redirect if not signed in
+    // Redirect if not authenticated
     useEffect(() => {
-        if (!isSignedIn) {
-            navigate("/"); // Not logged in? Back to Hero
+        if (!isAuthenticated) {
+            navigate("/signin"); // Not logged in? Back to Hero
         }
-    }, [user]);
+    }, [isAuthenticated, navigate]);
+
     const menuItems = [
         { id: '/profile', label: 'Profile', icon: User, path: '/profile' },
         { id: '/profile/messages', label: 'Messages', icon: MessageCircle, path: '/profile/messages' },
@@ -46,12 +46,12 @@ const Layout = () => {
                 <div className="p-4 md:p-3 border-b border-gray-700">
                     <div className="flex items-center justify-center md:justify-start gap-3">
                         <img
-                            src={user?.imageUrl}
+                            src={user?.imageUrl || '/default-avatar.png'}
                             alt="User"
-                            className="w-12 h-12 rounded-full border-2 border-indigo-500"
+                            className="w-12 h-12 rounded-full border-2 border-indigo-500 object-cover"
                         />
                         <div className="hidden md:block">
-                            <p className="font-semibold text-white truncate">{user?.fullName}</p>
+                            <p className="font-semibold text-white truncate">{user?.name}</p>
                             <p className="text-sm text-gray-400">Online</p>
                         </div>
                     </div>
@@ -89,7 +89,7 @@ const Layout = () => {
                 {/* Logout */}
                 <div className="p-2 md:p-4 border-t border-gray-700">
                     <button
-                        onClick={() => signOut({ redirectUrl: "/" })}
+                        onClick={logout}
                         className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors duration-200 justify-center md:justify-start"
                         title="Logout"
                     >
@@ -111,7 +111,6 @@ const Layout = () => {
                     <div className="relative flex-1 md:flex-initial">
                       <h3 className="text-white text-lg cursor-pointer" onClick={()=>navigate('/')} >Home</h3>
                     </div>
-                    <UserButton afterSignOutUrl="/" />
                   </div>
                 </div>
               </header>
