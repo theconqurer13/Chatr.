@@ -106,9 +106,6 @@ export const acceptFriendRequest = async (req,res)=>{
       return res.status(404).json({success:false,message:"Receiver not found"});
     }
     
-    console.log('Receiver friendRequests:', receiver.friendRequests);
-    console.log('Looking for senderID:', senderID);
-    
     if(!receiver.friendRequests.includes(senderID)){
       return res.status(400).json({success:false,message:"Friend request not found in your requests"});
     }

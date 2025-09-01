@@ -2,7 +2,7 @@ import User from "../models/User.js";
 
 export const friends = async (req,res)=>{
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.userId);
         const friends = user.friends;
         const friendsData = await User.find({_id:{$in:friends}});
         if(friendsData.length === 0){

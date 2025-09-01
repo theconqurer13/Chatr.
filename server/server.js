@@ -9,6 +9,8 @@ import friendsRouter from './routes/friendsRoutes.js';
 import pendingRouter from './routes/pendingRoutes.js';
 import authRouter from './routes/authRouter.js';
 import connectCloudinary from './configs/cloudinary.js';
+import chatRouter from './routes/chatRouter.js';
+import messageRouter from './routes/messageRoutes.js';
 connectDb();
 connectCloudinary();
 const app = express();
@@ -30,7 +32,8 @@ app.use('/api/auth',authRouter)
 app.use('/api/user',userRouter);
 app.use('/api/pending',pendingRouter);
 app.use('/api/friends',friendsRouter);
-
+app.use('/api/chat',chatRouter);
+app.use('/api/message',messageRouter);
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
     

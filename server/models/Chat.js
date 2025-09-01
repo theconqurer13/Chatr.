@@ -1,19 +1,32 @@
 import mongoose from "mongoose";
-
 const chatSchema = new mongoose.Schema({
-    participants: {
-        type: [String],
-        ref: "User",
+    members: {
+        type: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
+            }
+        ],
         required: true,
     },
     messages: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "Message",
+        type: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Message",
+            }
+        ],
+        
     },
     unreadMessageCount:{
          type:Number,
          default:0
+    },
+    lastMessage:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Message"
     }
 }, { timestamps: true });
 
-export const Chat = mongoose.model("Chat", chatSchema);
+ const Chat = mongoose.model("Chat", chatSchema);
+ export default Chat;
