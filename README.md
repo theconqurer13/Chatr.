@@ -52,57 +52,18 @@ Chatr/
   app/                          # React + Vite frontend
     src/
       Pages/
-        HeroSection.jsx         # Landing page
         Dashboard/              # Dashboard components
-          Dashboard.jsx         # Main dashboard view
-          Layout.jsx           # Dashboard layout wrapper
-          Messages.jsx         # Chat messaging interface
-          PendingRequests.jsx  # Friend request management
-          SearchUser.jsx       # User search and discovery
       components/               # Reusable UI components
-        Features.jsx           # Landing page features
-        Footer.jsx             # Footer component
-        Hero.jsx               # Hero section with animations
-        Loader.jsx             # Loading spinner
-        ProtectedRoute.jsx     # Route protection
-        RequestProfile.jsx     # Friend request profile cards
-        SignIn.jsx             # Sign in form
-        SignUp.jsx             # Sign up form
-        UserProfile.jsx        # User profile management
       context/
-        AppContext.jsx         # Global state management
       assets/                  # Static assets
       main.jsx                 # App bootstrap
       App.jsx                  # Main app with routing
-    package.json
-    vite.config.js
   server/                      # Express backend
-    configs/
-      db.js                    # MongoDB connection
-      cloudinary.js            # Cloudinary configuration
+    configs/ 
     controllers/
-      authController.js        # Authentication logic
-      chatController.js        # Chat management
-      clerkWebhooks.js         # Clerk webhook handlers
-      friendsController.js     # Friend system logic
-      messageController.js     # Message handling
-      pendingRequestController.js # Friend request logic
-      userController.js        # User management
     middleware/
-      authMiddleware.js        # JWT authentication middleware
-      multer.js                # File upload middleware
     models/
-      Chat.js                  # Chat schema
-      Message.js               # Message schema
-      User.js                  # User schema
     routes/
-      authRouter.js            # Authentication routes
-      chatRouter.js            # Chat routes
-      clerkRoutes.js           # Clerk integration routes
-      friendsRoutes.js         # Friend system routes
-      messageRoutes.js         # Message routes
-      pendingRoutes.js         # Friend request routes
-      userRoutes.js            # User management routes
     uploads/                   # Temporary file storage
     server.js                  # Main server file with Socket.IO
     package.json
@@ -170,35 +131,6 @@ The backend will run on `http://localhost:3002`
 
 **Backend (`server`):**
 - `npm start` – Start the server with Nodemon
-
-### API Endpoints
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
-- `GET /api/user/profile` - Get user profile
-- `PUT /api/user/profile` - Update user profile
-- `GET /api/user/search` - Search users
-- `POST /api/friends/send-request` - Send friend request
-- `POST /api/friends/accept-request` - Accept friend request
-- `GET /api/friends/list` - Get friends list
-- `GET /api/pending/requests` - Get pending requests
-- `POST /api/chat/create` - Create chat
-- `GET /api/chat/list` - Get user chats
-- `POST /api/message/send` - Send message
-- `GET /api/message/history` - Get chat history
-
-### Socket.IO Events
-**Client to Server:**
-- `join-room` - Join user room for real-time updates
-- `send-message` - Send message to chat
-- `mark-messages-read` - Mark messages as read
-- `user-online` - Broadcast online status
-
-**Server to Client:**
-- `receive-message` - Receive new message
-- `user-online` - User came online
-- `user-offline` - User went offline
-- `messages-read` - Messages marked as read
-- `online-users` - List of online users
 
 ### Database Schema
 **User Model:**
