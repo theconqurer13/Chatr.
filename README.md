@@ -4,6 +4,7 @@ A full-stack real-time chat application with user authentication, friend system,
 
 ### Preview
 <img src="app/src/assets/LandingPage.png" alt="Landing page - Chatr." />
+<img src="app/src/assets/userflow.png" alt="User flow - Chatr." />
 
 ### Features
 - **Real-time Messaging**: Instant messaging with Socket.IO
