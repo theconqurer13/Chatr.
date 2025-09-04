@@ -12,8 +12,27 @@ export const updateProfile = async (req, res) => {
     const userId = req.userId;
     
     if(req.file){
-      const result = await cloudinary.uploader.upload(req.file.path);
-      imageUrl = result?.secure_url;
+      // Upload buffer directly to cloudinary (memory storage)
+      const result = await cloudinary.uploader.upload_stream(
+        {
+          resource_type: "auto",
+          folder: "profile_photos" // Optional: organize uploads in a folder
+        },
+        (error, result) => {
+          if (error) throw error;
+          return result;
+        }
+      );
+      
+      // Convert buffer to base64 data URL for cloudinary
+      const b64 = Buffer.from(req.file.buffer).toString("base64");
+      const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+      const uploadResult = await cloudinary.uploader.upload(dataURI, {
+        resource_type: "auto",
+        folder: "profile_photos"
+      });
+      
+      imageUrl = uploadResult?.secure_url;
     }
     
     // Only update imageUrl if a new image was uploaded
