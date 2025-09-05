@@ -48,16 +48,14 @@ io.on('connection',(socket)=>{
     socket.on('join-room',(roomId)=>{
         socket.join(roomId);
         onlineUsers.add(socket.id);
-        console.log(`🏠 Socket ${socket.id} joined room: ${roomId}`);
-        console.log(`📋 Socket rooms:`, Array.from(socket.rooms));
+        
         
         // Broadcast user online status to friends
         socket.broadcast.emit('user-online', roomId);
     })
 
     socket.on('send-message',(message)=>{
-        console.log('📤 Received message to broadcast:', message);
-        console.log('👥 Broadcasting to members:', message.members);
+       
         
         // Broadcast to all members in the chat EXCEPT the sender
         message.members.forEach(memberId => {
@@ -77,8 +75,7 @@ io.on('connection',(socket)=>{
     })
 
     socket.on('user-online', (roomId) => {
-        console.log(`🏠 Socket ${socket.id} joined room: ${roomId}`);
-        console.log(`📋 Socket rooms:`, Array.from(socket.rooms));
+       
         
         // Broadcast user online status to friends
         socket.broadcast.emit('user-online', roomId);
@@ -86,7 +83,7 @@ io.on('connection',(socket)=>{
     });
 
     socket.on('mark-messages-read', (data) => {
-        console.log('📖 Messages marked as read:', data);
+        
         // Broadcast to the chat partner that messages have been read
         io.to(data.chatPartnerId).emit('messages-read', data);
     });

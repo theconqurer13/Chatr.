@@ -19,44 +19,56 @@ const Messages = () => {
   useEffect(() => {
     if (!socket) return;
 
+    // Join user's personal room for notifications
     socket.emit('join-room', user._id);
 
     const handleReceiveMessage = (message) => {
-      if (message.senderId === user._id) return;
-
-      setMessages((prev) => {
-        const isDuplicate = prev.some((msg) => msg._id === message._id);
-        if (isDuplicate) return prev;
-        return [...prev, message];
-      });
+      console.log('Received message:', message);
+      // Only add the message if it's for the current chat
+      if (message.chatId === chatId) {
+        setMessages(prev => {
+          // Check if message already exists to prevent duplicates
+          if (prev.some(msg => msg._id === message._id || 
+              (msg.senderId === message.senderId && msg.text === message.text && 
+               new Date(msg.createdAt).getTime() - new Date(message.createdAt).getTime() < 1000))) {
+            return prev;
+          }
+          return [...prev, message];
+        });
+      }
     };
 
     const handleUserOnline = (userId) => {
-      setFriends((prev) =>
-        prev.map((f) =>
-          f._id === userId ? { ...f, online: true } : f
-        )
+      setFriends(prev =>
+        prev.map(f => (f._id === userId ? { ...f, online: true } : f))
       );
     };
 
     const handleUserOffline = (userId) => {
-      setFriends((prev) =>
-        prev.map((f) =>
-          f._id === userId ? { ...f, online: false } : f
-        )
+      setFriends(prev =>
+        prev.map(f => (f._id === userId ? { ...f, online: false } : f))
       );
     };
 
+    // Add event listeners
     socket.on('receive-message', handleReceiveMessage);
     socket.on('user-online', handleUserOnline);
     socket.on('user-offline', handleUserOffline);
 
+    // Clean up event listeners
     return () => {
       socket.off('receive-message', handleReceiveMessage);
       socket.off('user-online', handleUserOnline);
       socket.off('user-offline', handleUserOffline);
     };
-  }, [socket, user._id]);
+  }, [socket, user._id, chatId]);
+
+  // Join chat room when chat changes
+  useEffect(() => {
+    if (socket && chatId) {
+      socket.emit('join-room', chatId);
+    }
+  }, [socket, chatId]);
 
   const fetchFriends = async () => {
     try {
@@ -78,7 +90,7 @@ const Messages = () => {
   };
   useEffect(() => {
     fetchFriends();
-  }, []);
+  },[]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -134,11 +146,11 @@ const Messages = () => {
     e.preventDefault();
     if (!newMessage.trim() || !activeConversation?._id || !socket) return;
 
-    const chatMembers =
-      activeConversation.members || [user._id, selectedFriend._id];
+    const chatMembers = activeConversation.members || [user._id, selectedFriend._id];
+    const tempMessageId = Date.now().toString();
 
     const localMessage = {
-      _id: Date.now().toString(),
+      _id: tempMessageId,
       senderId: user._id,
       sender: user._id,
       chatId,
@@ -148,10 +160,18 @@ const Messages = () => {
       createdAt: new Date().toISOString(),
     };
 
-    setMessages((prev) => [...prev, localMessage]);
-    socket.emit('send-message', localMessage);
+    // Optimistic update
+    setMessages(prev => [...prev, localMessage]);
+    setNewMessage('');
 
     try {
+      // Emit the message through socket
+      socket.emit('send-message', {
+        ...localMessage,
+        sender: { _id: user._id, name: user.name },
+      });
+
+      // Send to server
       const response = await axios.post(
         '/api/message/send-message',
         {
@@ -163,11 +183,19 @@ const Messages = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       if (response.data.success) {
-        setNewMessage('');
+        // Update the message with the one from server (which has the real _id)
+        setMessages(prev => 
+          prev.map(msg => 
+            msg._id === tempMessageId ? response.data.data : msg
+          )
+        );
       }
     } catch (error) {
-      console.log(error);
+      console.error('Error sending message:', error);
+      // Remove the optimistic update if there was an error
+      setMessages(prev => prev.filter(msg => msg._id !== tempMessageId));
     }
   };
 
@@ -261,46 +289,68 @@ const Messages = () => {
               >
                 <ArrowLeft size={20} />
               </button>
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
-                  {selectedFriend?.name?.charAt(0) || 'U'}
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-white font-medium">
-                    {selectedFriend?.name || 'User'}
-                  </h3>
-                  <p className="text-xs text-gray-400">
-                    {selectedFriend?.online ? 'Online' : 'Offline'}
-                  </p>
-                </div>
+              <div className="flex items-center justify-center w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300 shadow-md">
+              <img
+                src={
+                  selectedFriend?.imageUrl ||
+                  'https://placehold.co/40x40/6D28D9/FFFFFF?text=U'
+                }
+                alt="Avatar"
+                className="w-10 h-10 rounded-full"
+              />
               </div>
-            </div>
-            <button className="text-gray-400 hover:text-white p-1">
-              <MoreVertical size={20} />
-            </button>
-          </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 webkit-scrollbar-hidden">
-            {messages.map((message) => (
-              <div
-                key={message._id}
-                className={`flex ${
-                  message.senderId === user._id ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                <div
-                  className={`max-w-xs sm:max-w-md lg:max-w-lg rounded-lg px-3 py-2 text-sm ${
-                    message.senderId === user._id
-                      ? 'bg-indigo-600 text-white rounded-br-none'
-                      : 'bg-gray-700 text-white rounded-bl-none'
+              
+              <div className="flex flex-col ml-2">
+                <h4 className="font-semibold text-white text-sm">
+                  {selectedFriend?.name || 'Unknown User'}
+                </h4>
+                <p
+                  className={`text-sm ${
+                    selectedFriend?.online
+                      ? 'text-green-400'
+                      : 'text-gray-500'
                   }`}
                 >
-                  {message.text}
-                </div>
+                  {selectedFriend?.online ? 'Online' : 'Offline'}
+                </p>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
+            </div>
+          </div>
+          
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-6 sm:p-4 space-y-3 webkit-scrollbar-hidden">
+
+              {messages?.map((msg) => {
+                const isMyMessage = msg.senderId === user._id;
+                return (
+                  <div
+                    key={msg._id}
+                    className={`flex ${
+                      isMyMessage ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    <div
+                      className={`max-w-md px-4 py-3 rounded-2xl text-sm 
+                      ${
+                        isMyMessage
+                          ? 'bg-indigo-600 text-white rounded-br-lg'
+                          : 'bg-gray-700 text-gray-200 rounded-bl-lg'
+                      }`}
+                    >
+                      <p>{msg.text}</p>
+                      <span className="block text-xs text-gray-400 mt-1">
+                        {new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            
           </div>
 
           {/* Message Input */}
