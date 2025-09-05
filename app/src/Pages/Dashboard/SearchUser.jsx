@@ -102,7 +102,7 @@ const SearchUser = () => {
   return (
     <div className="space-y-6">
       {/* Search Bar */}
-      <div className="bg-gray-900 rounded-2xl shadow-lg border border-gray-700 p-6">
+      <div className="bg-gray-900  rounded-2xl shadow-lg border border-gray-700 p-6">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -114,7 +114,7 @@ const SearchUser = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchUsers()}
               autoFocus
-              className="w-full pl-12 pr-4 py-3 border border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg bg-gray-800 text-white placeholder-gray-400"
+              className="w-full sm:p-2 pl-12 pr-4 py-3 border border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg bg-gray-800 text-white placeholder-gray-400"
             />
           </div>
           <button

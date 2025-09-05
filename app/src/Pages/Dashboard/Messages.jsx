@@ -58,9 +58,6 @@ const Messages = () => {
     };
   }, [socket, user._id]);
 
-  
-  
-
   const fetchFriends = async () => {
     try {
       const response = await axios.get('/api/friends/', {
@@ -192,18 +189,19 @@ const Messages = () => {
       <div
         className={`${
           activeConversation ? 'hidden' : 'flex'
-        } md:flex flex-col 
-        w-full md:w-80 lg:w-96 bg-gray-800 border-r border-gray-700 transition-all duration-300`}
+        } md:flex flex-col w-full md:w-80 lg:w-96 bg-gray-800 border-r border-gray-700 transition-all duration-300`}
       >
-        <div className="p-4 border-b border-gray-700">
-          <h3 className="font-semibold text-white text-lg">Conversations</h3>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search friends..."
-            className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-full focus:ring-2 focus:ring-indigo-500 outline-none mt-4"
-          />
+        <div className="p-2 sm:p-2 border-b border-gray-700">
+          <h3 className="font-semibold text-white text-lg mb-2">Conversations</h3>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search conversations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
         </div>
         <div className="overflow-y-auto flex-1">
           {filteredAndSortedFriends?.map((conv) => (
@@ -251,103 +249,82 @@ const Messages = () => {
         </div>
       </div>
 
-      {/* --- Chat Window --- */}
-      {activeConversation ? (
-        <div className="flex-1 flex flex-col">
+      {/* --- Chat Area --- */}
+      {activeConversation && (
+        <div className="flex flex-col h-full w-full bg-gray-900">
           {/* Chat Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800">
-            <div className="flex items-center gap-3 ">
+          <div className="flex items-center justify-between p-2 sm:p-4 border-b border-gray-700 bg-gray-800">
+            <div className="flex items-center">
               <button
-                className="text-gray-400 hover:text-white md:hidden"
                 onClick={() => setActiveConversation(null)}
+                className="md:hidden mr-2 p-1 text-gray-400 hover:text-white"
               >
                 <ArrowLeft size={20} />
               </button>
-              <img
-                src={
-                  selectedFriend?.imageUrl ||
-                  'https://placehold.co/40x40/6D28D9/FFFFFF?text=U'
-                }
-                alt="Avatar"
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <h4 className="font-semibold text-white">
-                  {selectedFriend?.name || 'Unknown User'}
-                </h4>
-                <p
-                  className={`text-sm ${
-                    selectedFriend?.online
-                      ? 'text-green-400'
-                      : 'text-gray-500'
-                  }`}
-                >
-                  {selectedFriend?.online ? 'Online' : 'Offline'}
-                </p>
+              <div className="flex items-center">
+                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
+                  {selectedFriend?.name?.charAt(0) || 'U'}
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-white font-medium">
+                    {selectedFriend?.name || 'User'}
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    {selectedFriend?.online ? 'Online' : 'Offline'}
+                  </p>
+                </div>
               </div>
             </div>
-            <button className="text-gray-400 hover:text-white">
+            <button className="text-gray-400 hover:text-white p-1">
               <MoreVertical size={20} />
             </button>
           </div>
 
-          {/* Message Area */}
-          <div className="flex-1 overflow-y-auto p-6 webkit-scrollbar-hidden">
-            <div className="space-y-3">
-              {messages?.map((msg) => {
-                const isMyMessage = msg.senderId === user._id;
-                return (
-                  <div
-                    key={msg._id}
-                    className={`flex ${
-                      isMyMessage ? 'justify-end' : 'justify-start'
-                    }`}
-                  >
-                    <div
-                      className={`max-w-md px-4 py-3 rounded-2xl text-sm 
-                      ${
-                        isMyMessage
-                          ? 'bg-indigo-600 text-white rounded-br-lg'
-                          : 'bg-gray-700 text-gray-200 rounded-bl-lg'
-                      }`}
-                    >
-                      <p>{msg.text}</p>
-                      <span className="block text-xs text-gray-400 mt-1">
-                        {new Date(msg.createdAt).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-              <div ref={messagesEndRef} />
-            </div>
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 webkit-scrollbar-hidden">
+            {messages.map((message) => (
+              <div
+                key={message._id}
+                className={`flex ${
+                  message.senderId === user._id ? 'justify-end' : 'justify-start'
+                }`}
+              >
+                <div
+                  className={`max-w-xs sm:max-w-md lg:max-w-lg rounded-lg px-3 py-2 text-sm ${
+                    message.senderId === user._id
+                      ? 'bg-indigo-600 text-white rounded-br-none'
+                      : 'bg-gray-700 text-white rounded-bl-none'
+                  }`}
+                >
+                  {message.text}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="border-t border-gray-700 p-4 bg-gray-800">
-            <form onSubmit={handleSendMessage} className="flex items-center gap-3">
+          {/* Message Input */}
+          <form
+            onSubmit={handleSendMessage}
+            className="p-2 sm:p-4 border-t border-gray-700 bg-gray-800"
+          >
+            <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type a message..."
-                className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-full focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="flex-1 bg-gray-700 text-white rounded-full px-1 md:px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <button
                 type="submit"
-                className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 transition-colors"
+                disabled={!newMessage.trim()}
+                className="p-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <SendHorizontal size={20} />
+                <SendHorizontal size={18} />
               </button>
-            </form>
-          </div>
-        </div>
-      ) : (
-        <div className="hidden md:flex flex-1 items-center justify-center text-gray-500">
-          <p>Select a conversation to start chatting</p>
+            </div>
+          </form>
         </div>
       )}
     </div>
