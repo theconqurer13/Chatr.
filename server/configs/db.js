@@ -30,7 +30,7 @@ const connectDb = async () => {
     console.log('🔌 Attempting to connect to MongoDB...');
     
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URL, options);
+    await mongoose.connect(`${process.env.MONGODB_URL}/chatr`, options);
     
     console.log(`🚀 Database connection established to ${mongoose.connection.host}`);
     console.log(`📚 Database name: ${mongoose.connection.name}`);
