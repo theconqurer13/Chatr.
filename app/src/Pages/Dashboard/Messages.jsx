@@ -15,6 +15,16 @@ const Messages = () => {
   const messagesEndRef = useRef(null);
   const socket = useSocket();
 
+  // 🔥 Normalizer for messages
+  const normalizeMessage = (msg) => ({
+    ...msg,
+    senderId:
+      msg.senderId ||
+      (typeof msg.sender === 'string' ? msg.sender : msg.sender?._id),
+    sender:
+      typeof msg.sender === 'string' ? { _id: msg.sender } : msg.sender,
+  });
+
   // socket listener
   useEffect(() => {
     if (!socket) return;
@@ -23,30 +33,40 @@ const Messages = () => {
     socket.emit('join-room', user._id);
 
     const handleReceiveMessage = (message) => {
-      console.log('Received message:', message);
+      const normalizedMsg = normalizeMessage(message);
+      console.log('Received message:', normalizedMsg);
+
       // Only add the message if it's for the current chat
-      if (message.chatId === chatId) {
-        setMessages(prev => {
-          // Check if message already exists to prevent duplicates
-          if (prev.some(msg => msg._id === message._id || 
-              (msg.senderId === message.senderId && msg.text === message.text && 
-               new Date(msg.createdAt).getTime() - new Date(message.createdAt).getTime() < 1000))) {
+      if (normalizedMsg.chatId === chatId) {
+        setMessages((prev) => {
+          if (
+            prev.some(
+              (msg) =>
+                msg._id === normalizedMsg._id ||
+                (msg.senderId === normalizedMsg.senderId &&
+                  msg.text === normalizedMsg.text &&
+                  Math.abs(
+                    new Date(msg.createdAt).getTime() -
+                      new Date(normalizedMsg.createdAt).getTime()
+                  ) < 1000)
+            )
+          ) {
             return prev;
           }
-          return [...prev, message];
+          return [...prev, normalizedMsg];
         });
       }
     };
 
     const handleUserOnline = (userId) => {
-      setFriends(prev =>
-        prev.map(f => (f._id === userId ? { ...f, online: true } : f))
+      setFriends((prev) =>
+        prev.map((f) => (f._id === userId ? { ...f, online: true } : f))
       );
     };
 
     const handleUserOffline = (userId) => {
-      setFriends(prev =>
-        prev.map(f => (f._id === userId ? { ...f, online: false } : f))
+      setFriends((prev) =>
+        prev.map((f) => (f._id === userId ? { ...f, online: false } : f))
       );
     };
 
@@ -76,11 +96,10 @@ const Messages = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.data.success) {
-        // Initialize friends with proper online status and unread count
-        const friendsWithStatus = response.data.friendsData.map(friend => ({
+        const friendsWithStatus = response.data.friendsData.map((friend) => ({
           ...friend,
-          online: friend.online || false, // Ensure online property exists
-          unreadMessageCount: friend.unreadMessageCount || 0
+          online: friend.online || false,
+          unreadMessageCount: friend.unreadMessageCount || 0,
         }));
         setFriends(friendsWithStatus);
       }
@@ -90,7 +109,7 @@ const Messages = () => {
   };
   useEffect(() => {
     fetchFriends();
-  },[]);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -128,15 +147,11 @@ const Messages = () => {
           }
         );
         if (response.data.success) {
-          // Normalize senderId for consistent alignment
-          const normalized = response.data.data.map((msg) => ({
-            ...msg,
-            senderId: msg.senderId || msg.sender?._id || msg.sender,
-          }));
+          const normalized = response.data.data.map(normalizeMessage);
           setMessages(normalized);
         }
       } catch (error) {
-        console.log(error);
+        console.error('Error fetching messages:', error);
       }
     };
     fetchMessages();
@@ -146,32 +161,31 @@ const Messages = () => {
     e.preventDefault();
     if (!newMessage.trim() || !activeConversation?._id || !socket) return;
 
-    const chatMembers = activeConversation.members || [user._id, selectedFriend._id];
+    const chatMembers =
+      activeConversation.members || [user._id, selectedFriend._id];
     const tempMessageId = Date.now().toString();
 
-    const localMessage = {
+    const localMessage = normalizeMessage({
       _id: tempMessageId,
       senderId: user._id,
-      sender: user._id,
+      sender: { _id: user._id },
       chatId,
       text: newMessage,
       members: chatMembers,
       read: false,
       createdAt: new Date().toISOString(),
-    };
+    });
 
     // Optimistic update
-    setMessages(prev => [...prev, localMessage]);
+    setMessages((prev) => [...prev, localMessage]);
     setNewMessage('');
 
     try {
-      // Emit the message through socket
       socket.emit('send-message', {
         ...localMessage,
         sender: { _id: user._id, name: user.name },
       });
 
-      // Send to server
       const response = await axios.post(
         '/api/message/send-message',
         {
@@ -185,21 +199,18 @@ const Messages = () => {
       );
 
       if (response.data.success) {
-        // Update the message with the one from server (which has the real _id)
-        setMessages(prev => 
-          prev.map(msg => 
-            msg._id === tempMessageId ? response.data.data : msg
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === tempMessageId ? normalizeMessage(response.data.data) : msg
           )
         );
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      // Remove the optimistic update if there was an error
-      setMessages(prev => prev.filter(msg => msg._id !== tempMessageId));
+      setMessages((prev) => prev.filter((msg) => msg._id !== tempMessageId));
     }
   };
 
-  // Filter and sort friends
   const filteredAndSortedFriends = friends
     .filter((friend) =>
       friend.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -290,25 +301,23 @@ const Messages = () => {
                 <ArrowLeft size={20} />
               </button>
               <div className="flex items-center justify-center w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300 shadow-md">
-              <img
-                src={
-                  selectedFriend?.imageUrl ||
-                  'https://placehold.co/40x40/6D28D9/FFFFFF?text=U'
-                }
-                alt="Avatar"
-                className="w-10 h-10 rounded-full"
-              />
+                <img
+                  src={
+                    selectedFriend?.imageUrl ||
+                    'https://placehold.co/40x40/6D28D9/FFFFFF?text=U'
+                  }
+                  alt="Avatar"
+                  className="w-10 h-10 rounded-full"
+                />
               </div>
-              
+
               <div className="flex flex-col ml-2">
                 <h4 className="font-semibold text-white text-sm">
                   {selectedFriend?.name || 'Unknown User'}
                 </h4>
                 <p
                   className={`text-sm ${
-                    selectedFriend?.online
-                      ? 'text-green-400'
-                      : 'text-gray-500'
+                    selectedFriend?.online ? 'text-green-400' : 'text-gray-500'
                   }`}
                 >
                   {selectedFriend?.online ? 'Online' : 'Offline'}
@@ -316,41 +325,39 @@ const Messages = () => {
               </div>
             </div>
           </div>
-          
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-6 sm:p-4 space-y-3 webkit-scrollbar-hidden">
+            {messages?.map((msg) => {
+              const senderId = msg.senderId;
+              const isMyMessage = senderId === user?._id;
 
-              {messages?.map((msg) => {
-                const isMyMessage = msg.senderId === user._id;
-                return (
+              return (
+                <div
+                  key={msg._id}
+                  className={`flex ${
+                    isMyMessage ? 'justify-end' : 'justify-start'
+                  } w-full`}
+                >
                   <div
-                    key={msg._id}
-                    className={`flex ${
-                      isMyMessage ? 'justify-end' : 'justify-start'
+                    className={`max-w-md px-4 py-3 rounded-2xl text-sm ${
+                      isMyMessage
+                        ? 'bg-indigo-600 text-white rounded-br-lg'
+                        : 'bg-gray-700 text-gray-200 rounded-bl-lg'
                     }`}
                   >
-                    <div
-                      className={`max-w-md px-4 py-3 rounded-2xl text-sm 
-                      ${
-                        isMyMessage
-                          ? 'bg-indigo-600 text-white rounded-br-lg'
-                          : 'bg-gray-700 text-gray-200 rounded-bl-lg'
-                      }`}
-                    >
-                      <p>{msg.text}</p>
-                      <span className="block text-xs text-gray-400 mt-1">
-                        {new Date(msg.createdAt).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
-                    </div>
+                    <p>{msg.text}</p>
+                    <span className="block text-xs text-gray-400 mt-1">
+                      {new Date(msg.createdAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
                   </div>
-                );
-              })}
-              <div ref={messagesEndRef} />
-            
+                </div>
+              );
+            })}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Message Input */}
