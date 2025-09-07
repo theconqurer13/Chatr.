@@ -2,7 +2,7 @@
 
 A full-stack real-time chat application with user authentication, friend system, and file sharing. Built with React + Vite frontend and Express + MongoDB backend with Socket.IO for real-time messaging.
 
-[![Live Demo](https://img.shields.io/badge/View%20Live%20Demo-Chatr%20App-blue?style=for-the-badge&logo=vercel)](https://chatr-app.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/View%20Live%20Demo-Chatr%20App-blue?style=for-the-badge&logo=vercel)](https://chatr-okbvbvnch-aditya-kumar-jethvanths-projects.vercel.app/)
 
 ### Preview
 <img src="app/src/assets/LandingPage.png" alt="Landing page - Chatr." />
