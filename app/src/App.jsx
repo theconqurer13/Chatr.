@@ -26,7 +26,7 @@ const App = () => {
 
   useEffect(() => {
     // Initialize socket connection
-    const newSocket = io("http://localhost:3002", {
+    const newSocket = io(import.meta.env.VITE_BACKEND_URL, {
       transports: ['websocket', 'polling'], // Fallback transports
       timeout: 20000,
     });
